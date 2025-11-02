@@ -18,9 +18,7 @@ Kitaikuyo，秋天的咸鱼，FL已躺平，yoyo514
 
 打包的文件在 `dist` 目录中，可通过 jsDelivr 获取
 
-[仓库打包目录 jsDelivr](https://testingcf.jsdelivr.net/gh/Hilothea/FrontEnd-for-destined-journey/dist/)
-
-[状态栏 jsDelivr](https://testingcf.jsdelivr.net/gh/Hilothea/FrontEnd-for-destined-journey/dist/status_bar/index.html)
+[仓库打包目录 jsDelivr](https://testingcf.jsdelivr.net/gh/The-poem-of-destiny/Worldbook-for-destined-journey/)
 
 ## 添加预设数据
 

@@ -14,6 +14,8 @@ interface Props {
   icon?: string;
   /** 额外的 CSS 类名 */
   customClass?: string;
+  /** 是否在分栏布局中 */
+  inSplitLayout?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -23,6 +25,7 @@ const props = withDefaults(defineProps<Props>(), {
   variant: 'section',
   icon: '',
   customClass: '',
+  inSplitLayout: false,
 });
 
 // 控制展开/收起状态
@@ -45,24 +48,30 @@ onUnmounted(() => {
 });
 
 // 判断摘要内容是否过长，需要换行显示
-// 基于字符长度和窗口宽度的简单判断
+// 基于字符长度和窗口宽度的判断
 const shouldWrapSummary = computed(() => {
   if (!props.summaryDetails) return false;
 
   const textLength = props.summaryDetails.length;
 
-  // 移动端（<= 600px）：超过10个字符就换行
+  // 如果在分栏布局中，超过10个字符就换行
+  if (props.inSplitLayout) {
+    return textLength > 10;
+  }
+
+  // 普通布局：根据窗口宽度判断
+  // 移动端（<= 600px）：超过10个字符就换行（与分栏布局相同）
   if (windowWidth.value <= 600) {
     return textLength > 10;
   }
 
-  // 平板端（600px < width <= 1000px）：超过30个字符就换行
+  // 平板端（600px < width <= 1000px）：超过20个字符就换行
   if (windowWidth.value <= 1000) {
-    return textLength > 30;
+    return textLength > 20;
   }
 
-  // 桌面端（> 1000px）：超过50个字符才换行
-  return textLength > 50;
+  // 桌面端（> 1000px）：超过30个字符才换行
+  return textLength > 30;
 });
 
 // 计算组件的 CSS 类名
@@ -256,7 +265,7 @@ const onAfterLeave = (el: Element) => {
 
 /* 右侧摘要信息（同行显示） */
 .summary-details {
-  margin-left: auto;
+  margin-left: 8px;
   padding-right: 15px;
   font-family: 'Noto Sans SC', 'Courier New', monospace;
   font-weight: 500;
@@ -280,7 +289,6 @@ const onAfterLeave = (el: Element) => {
   letter-spacing: 0.5px;
   text-shadow: 0 0 1px rgba(0, 0, 0, 0.05);
   line-height: 1.4;
-  word-break: auto-phrase; /* 实验性功能，智能换行 */
 }
 
 /* 右侧箭头 */

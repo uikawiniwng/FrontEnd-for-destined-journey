@@ -46,6 +46,11 @@ const skills = computed(() => {
 
   return { active, passive, other };
 });
+
+// 判断是否为分栏布局（没有其他技能时才是分栏布局）
+const isInSplitLayout = computed(() => {
+  return skills.value.other.length === 0;
+});
 </script>
 
 <template>
@@ -64,6 +69,7 @@ const skills = computed(() => {
             :tags="skill.tags"
             :effect="skill.effect"
             :description="skill.description"
+            :in-split-layout="isInSplitLayout"
             type="active"
           />
         </div>
@@ -82,6 +88,7 @@ const skills = computed(() => {
             :tags="skill.tags"
             :effect="skill.effect"
             :description="skill.description"
+            :in-split-layout="isInSplitLayout"
             type="passive"
           />
         </div>
@@ -102,6 +109,7 @@ const skills = computed(() => {
             :effect="skill.effect"
             :description="skill.description"
             :other-type-name="skill.type"
+            :in-split-layout="false"
             type="other"
           />
         </div>

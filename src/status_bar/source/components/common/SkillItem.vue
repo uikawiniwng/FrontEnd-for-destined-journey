@@ -21,6 +21,8 @@ interface Props {
   otherTypeName?: string;
   /** 是否在摘要中显示类型 */
   showTypeInSummary?: boolean;
+  /** 是否在分栏布局中 */
+  inSplitLayout?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -30,6 +32,7 @@ const props = withDefaults(defineProps<Props>(), {
   effect: '',
   otherTypeName: '其它',
   showTypeInSummary: false,
+  inSplitLayout: false,
 });
 
 // 计算技能标题（只包含名称和品质）
@@ -77,6 +80,7 @@ const summaryDetails = computed(() => {
     :default-open="false"
     custom-class="skill-item"
     :summary-details="summaryDetails"
+    :in-split-layout="inSplitLayout"
   >
     <template #title>
       <span class="value-main" :class="getQualityClass(quality)">

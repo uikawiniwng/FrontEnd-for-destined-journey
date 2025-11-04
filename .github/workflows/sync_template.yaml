@@ -1,8 +1,8 @@
-name: sync_template_no_history
+name: sync_template
 
 on:
   schedule:
-    - cron: '0 3 * * *'
+    - cron: 0 3 * * *
   workflow_dispatch:
 
 permissions:
@@ -27,13 +27,13 @@ jobs:
       - name: Copy template files (respecting .templatesyncignore)
         run: |
           if [ -f .github/.templatesyncignore ]; then
-            rsync -av --delete \
+            rsync -av \
               --exclude-from=.github/.templatesyncignore \
               --exclude='.git' \
               --exclude='.github/.templatesyncignore' \
               /tmp/template/ ./
           else
-            rsync -av --delete --exclude='.git' /tmp/template/ ./
+            rsync -av --exclude='.git' /tmp/template/ ./
           fi
 
       - name: Check for changes

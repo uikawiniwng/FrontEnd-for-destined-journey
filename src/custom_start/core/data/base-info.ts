@@ -55,7 +55,7 @@ export const START_LOCATIONS = [
  */
 const checkDevModeByName = (name: string): boolean => {
   // 暗号：姓名中包含 "[dev]" 或 "[test]"（不区分大小写）
-  const devPatterns = ['[dev]', '[test]'];
+  const devPatterns = ['[dev]', '[test]', '田所浩二'];
   const lowerName = name.toLowerCase();
   return devPatterns.some(pattern => lowerName.includes(pattern));
 };
@@ -70,7 +70,7 @@ const checkDevModeByName = (name: string): boolean => {
 export const generateInitialPoints = (characterName?: string): number => {
   // 开发者模式：如果角色名包含特定暗号，返回高点数
   if (characterName && checkDevModeByName(characterName)) {
-    return 9999;
+    return 114514;
   }
 
   const random = Math.random();
@@ -101,6 +101,23 @@ export const MIN_LEVEL = 1;
 
 // 基础属性值
 export const BASE_STAT = 4;
+
+export const raceAttrs: { [key: string]: { 力量: number; 敏捷: number; 体质: number; 智力: number; 精神: number } } = {
+  地精: { 力量: 0, 敏捷: 0, 体质: 0, 智力: 0, 精神: 0 },
+  人类: { 力量: 0, 敏捷: 0, 体质: 0, 智力: 0, 精神: 0 },
+  兽族: { 力量: 0, 敏捷: 0, 体质: 0, 智力: 0, 精神: 0 },
+  翼民: { 力量: 0, 敏捷: 0, 体质: 0, 智力: 0, 精神: 0 },
+  矮人: { 力量: 0, 敏捷: 0, 体质: 0, 智力: 0, 精神: 0 },
+  精灵: { 力量: 0, 敏捷: 0, 体质: 0, 智力: 0, 精神: 0 },
+  亡灵种族: { 力量: 0, 敏捷: 0, 体质: 0, 智力: 0, 精神: 0 },
+  深渊魔族: { 力量: 0, 敏捷: 0, 体质: 0, 智力: 0, 精神: 0 },
+  巨人: { 力量: 0, 敏捷: 0, 体质: 0, 智力: 0, 精神: 0 },
+  妖精: { 力量: 0, 敏捷: 0, 体质: 0, 智力: 0, 精神: 0 },
+  血族: { 力量: 0, 敏捷: 0, 体质: 0, 智力: 0, 精神: 0 },
+  龙族: { 力量: 0, 敏捷: 0, 体质: 0, 智力: 0, 精神: 0 },
+  半身人: { 力量: 0, 敏捷: 0, 体质: 0, 智力: 0, 精神: 0 },
+  女妖: { 力量: 0, 敏捷: 0, 体质: 0, 智力: 0, 精神: 0 },
+};
 
 /**
  * 根据等级计算可用的【额外】AP点数

@@ -12,6 +12,7 @@ import {
   MAX_LEVEL,
   MIN_LEVEL,
   RACE_COSTS,
+  raceAttrs,
   START_LOCATIONS,
 } from '../../data/base-info';
 import { useCharacterStore } from '../../store';
@@ -30,6 +31,11 @@ const identityOptions = computed(() => Object.keys(IDENTITY_COSTS));
 
 // 计算当前等级的层级属性加成
 const tierAttributeBonus = computed(() => getTierAttributeBonus(character.value.level));
+
+const raceAttributeBonus = computed(() => {
+  const displayRace = character.value.race === '自定义' ? character.value.customRace : character.value.race;
+  return raceAttrs[displayRace] || { 力量: 0, 敏捷: 0, 体质: 0, 智力: 0, 精神: 0 };
+});
 
 // 计算剩余可用转生点数
 const availableReincarnationPoints = computed(() => {
@@ -236,8 +242,8 @@ const resetPage = () => {
               />
               <div class="attribute-display">
                 {{ BASE_STAT }} <span class="dim">(基础)</span> + {{ tierAttributeBonus }}
-                <span class="dim">(层级)</span> + {{ character.attributePoints[attr] }}
-                <span class="dim">(额外)</span> =
+                <span class="dim">(层级)</span> + {{ raceAttributeBonus[attr] }} <span class="dim">(物种)</span> +
+                {{ character.attributePoints[attr] }} <span class="dim">(额外)</span> =
                 <strong class="final-value">{{ characterStore.finalAttributes[attr] }}</strong>
               </div>
             </div>

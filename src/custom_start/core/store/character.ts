@@ -9,6 +9,7 @@ import {
   IDENTITY_COSTS,
   INITIAL_REINCARNATION_POINTS,
   RACE_COSTS,
+  raceAttrs,
 } from '../data/base-info';
 import type { Attributes, Background, CharacterConfig, DestinedOne, Equipment, Item, Skill } from '../types';
 
@@ -227,10 +228,15 @@ export const useCharacterStore = defineStore('character', () => {
 
   // 最终属性计算
   const finalAttributes = computed(() => {
+    let raceAttrsadditional = { 力量: 0, 敏捷: 0, 体质: 0, 智力: 0, 精神: 0 };
+    const displayRace = character.value.race === '自定义' ? character.value.customRace : character.value.race;
     const tierBonus = getTierAttributeBonus(character.value.level);
     const result: Partial<Attributes> = {};
+    if (raceAttrs[displayRace] !== undefined) {
+      raceAttrsadditional = raceAttrs[displayRace];
+    }
     for (const attr of ATTRIBUTES) {
-      result[attr] = BASE_STAT + tierBonus + character.value.attributePoints[attr];
+      result[attr] = BASE_STAT + tierBonus + character.value.attributePoints[attr] + raceAttrsadditional[attr];
     }
     return result as Attributes;
   });

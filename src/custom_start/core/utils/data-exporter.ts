@@ -1,4 +1,4 @@
-import { BASE_STAT, getTierAttributeBonus } from '../data/base-info';
+import { BASE_STAT, getTierAttributeBonus, raceAttrs } from '../data/base-info';
 import { RARITY_MAP } from '../data/constants';
 import type { Background, CharacterConfig, DestinedOne, Equipment, Item, Skill } from '../types';
 
@@ -224,12 +224,16 @@ export function generateAIPrompt(
 
   // 角色属性
   const tierBonus = getTierAttributeBonus(character.level);
+  let raceAttrsadditional = { 力量: 0, 敏捷: 0, 体质: 0, 智力: 0, 精神: 0 };
+  if (raceAttrs[displayRace] !== undefined) {
+    raceAttrsadditional = raceAttrs[displayRace];
+  }
   const finalAttrs = {
-    力量: BASE_STAT + tierBonus + character.attributePoints.力量,
-    敏捷: BASE_STAT + tierBonus + character.attributePoints.敏捷,
-    体质: BASE_STAT + tierBonus + character.attributePoints.体质,
-    智力: BASE_STAT + tierBonus + character.attributePoints.智力,
-    精神: BASE_STAT + tierBonus + character.attributePoints.精神,
+    力量: BASE_STAT + tierBonus + character.attributePoints.力量 + raceAttrsadditional.力量,
+    敏捷: BASE_STAT + tierBonus + character.attributePoints.敏捷 + raceAttrsadditional.敏捷,
+    体质: BASE_STAT + tierBonus + character.attributePoints.体质 + raceAttrsadditional.体质,
+    智力: BASE_STAT + tierBonus + character.attributePoints.智力 + raceAttrsadditional.智力,
+    精神: BASE_STAT + tierBonus + character.attributePoints.精神 + raceAttrsadditional.精神,
   };
 
   parts.push(`\n## 角色属性`);

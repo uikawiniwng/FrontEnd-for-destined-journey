@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, inject, onMounted, ref, watch, type Ref } from 'vue';
+import { RACE_COSTS } from '../../data/base-info';
 import { getEquipments } from '../../data/equipments';
 import { getInitialItems } from '../../data/Items';
 import { getActiveSkills, getPassiveSkills } from '../../data/skills';
@@ -55,27 +56,76 @@ const subCategories = computed(() => {
   }
 });
 
-// 获取技能的子分类（战技、法术、祷告、其它）
+// 检查技能子分类是否可用（基于种族限制）
+const isSkillSubCategoryAvailable = (subCategory: string): boolean => {
+  // 获取当前角色的种族
+  const currentRace =
+    characterStore.character.race === '自定义' ? characterStore.character.customRace : characterStore.character.race;
+
+  // 获取所有种族列表
+  const raceSpecificCategories = Object.keys(RACE_COSTS).filter(race => race !== '自定义');
+
+  if (raceSpecificCategories.includes(subCategory)) {
+    return currentRace === subCategory;
+  }
+
+  // 其他分类默认可用
+  return true;
+};
+
+// 获取技能的子分类（战技、法术、祷告、其它），并将被禁用的分类排到底部
 const skillSubCategories = computed(() => {
   if (currentCategory.value !== 'skill') return [];
 
+  let categories: string[] = [];
   if (currentSubCategory.value === '主动技能') {
-    return Object.keys(activeSkills.value);
+    categories = Object.keys(activeSkills.value);
   } else if (currentSubCategory.value === '被动技能') {
-    return Object.keys(passiveSkills.value);
+    categories = Object.keys(passiveSkills.value);
   }
-  return [];
+
+  // 将分类分为可用和不可用两组
+  const available: string[] = [];
+  const unavailable: string[] = [];
+
+  categories.forEach(cat => {
+    if (isSkillSubCategoryAvailable(cat)) {
+      available.push(cat);
+    } else {
+      unavailable.push(cat);
+    }
+  });
+
+  // 可用的在前，不可用的在后
+  return [...available, ...unavailable];
 });
 
 // 当前选中的技能子分类
 const currentSkillSubCategory = ref<string>('');
 
-// 当技能子分类改变时，初始化第一个子分类
+// 当技能子分类改变时，初始化第一个可用的子分类
 watch([currentCategory, currentSubCategory], () => {
   if (currentCategory.value === 'skill' && currentSubCategory.value) {
-    currentSkillSubCategory.value = skillSubCategories.value[0] || '';
+    // 找到第一个可用的子分类
+    const firstAvailable = skillSubCategories.value.find(cat => isSkillSubCategoryAvailable(cat));
+    currentSkillSubCategory.value = firstAvailable || '';
   }
 });
+
+// 监听种族变化
+watch(
+  () => [characterStore.character.race, characterStore.character.customRace],
+  () => {
+    // 如果当前选中的技能子分类不可用，切换到第一个可用的
+    if (currentCategory.value === 'skill' && currentSkillSubCategory.value) {
+      if (!isSkillSubCategoryAvailable(currentSkillSubCategory.value)) {
+        const firstAvailable = skillSubCategories.value.find(cat => isSkillSubCategoryAvailable(cat));
+        currentSkillSubCategory.value = firstAvailable || '';
+      }
+    }
+  },
+  { deep: true },
+);
 
 // 当分类改变时，重置子分类和品质筛选
 watch(currentCategory, () => {
@@ -292,8 +342,12 @@ const handleAddCustomItem = (item: Equipment | Item | Skill, type: 'equipment' |
                     v-for="subCat in skillSubCategories"
                     :key="subCat"
                     class="sub-category-item"
-                    :class="{ active: currentSkillSubCategory === subCat }"
-                    @click="currentSkillSubCategory = subCat"
+                    :class="{
+                      active: currentSkillSubCategory === subCat,
+                      disabled: !isSkillSubCategoryAvailable(subCat),
+                    }"
+                    :disabled="!isSkillSubCategoryAvailable(subCat)"
+                    @click="isSkillSubCategoryAvailable(subCat) && (currentSkillSubCategory = subCat)"
                   >
                     {{ subCat }}
                   </button>
@@ -463,7 +517,7 @@ const handleAddCustomItem = (item: Equipment | Item | Skill, type: 'equipment' |
     word-break: break-word;
     line-height: 1.3;
 
-    &:hover {
+    &:hover:not(.disabled) {
       border-left-color: var(--accent-color);
       background: rgba(212, 175, 55, 0.05);
       color: var(--text-color);
@@ -474,6 +528,19 @@ const handleAddCustomItem = (item: Equipment | Item | Skill, type: 'equipment' |
       border-left-color: var(--accent-color);
       color: var(--accent-color);
       font-weight: 600;
+    }
+
+    &.disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      background: var(--input-bg);
+      color: var(--text-light);
+      border-left-color: var(--border-color-light);
+
+      &:hover {
+        background: var(--input-bg);
+        border-left-color: var(--border-color-light);
+      }
     }
   }
 }

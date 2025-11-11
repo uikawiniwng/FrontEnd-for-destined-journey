@@ -11,6 +11,7 @@ import {
   RACE_COSTS,
   raceAttrs,
 } from '../data/base-info';
+import { getActiveSkills, getPassiveSkills } from '../data/skills';
 import type { Attributes, Background, CharacterConfig, DestinedOne, Equipment, Item, Skill } from '../types';
 
 export const useCharacterStore = defineStore('character', () => {
@@ -254,6 +255,52 @@ export const useCharacterStore = defineStore('character', () => {
         精神: 0,
       };
     },
+  );
+
+  // 监听种族变化，清除不符合新种族要求的技能
+  watch(
+    () => [character.value.race, character.value.customRace],
+    () => {
+      // 获取当前种族（包括自定义种族）
+      const currentRace = character.value.race === '自定义' ? character.value.customRace : character.value.race;
+
+      // 获取所有种族列表
+      const raceSpecificCategories = Object.keys(RACE_COSTS).filter(race => race !== '自定义');
+
+      // 获取技能数据
+      const activeSkills = getActiveSkills();
+      const passiveSkills = getPassiveSkills();
+
+      // 找出需要移除的技能索引（倒序遍历，避免索引问题）
+      for (let i = selectedSkills.value.length - 1; i >= 0; i--) {
+        const skill = selectedSkills.value[i];
+        let skillCategory = '';
+
+        // 在主动技能中查找
+        for (const [category, skills] of Object.entries(activeSkills)) {
+          if (skills.some(s => s.name === skill.name)) {
+            skillCategory = category;
+            break;
+          }
+        }
+
+        // 在被动技能中查找
+        if (!skillCategory) {
+          for (const [category, skills] of Object.entries(passiveSkills)) {
+            if (skills.some(s => s.name === skill.name)) {
+              skillCategory = category;
+              break;
+            }
+          }
+        }
+
+        // 如果技能分类是种族特定的，且不匹配当前种族，移除该技能
+        if (raceSpecificCategories.includes(skillCategory) && skillCategory !== currentRace) {
+          selectedSkills.value.splice(i, 1);
+        }
+      }
+    },
+    { deep: true },
   );
 
   return {

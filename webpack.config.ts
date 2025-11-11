@@ -252,7 +252,7 @@ function parse_configuration(entry: Entry): (_env: any, argv: any) => webpack.Co
             },
           ].concat(
             entry.html === undefined
-              ? <any[]>[
+              ? ([
                   {
                     test: /\.vue\.s(a|c)ss$/,
                     use: [
@@ -287,8 +287,8 @@ function parse_configuration(entry: Entry): (_env: any, argv: any) => webpack.Co
                     use: ['style-loader', { loader: 'css-loader', options: { url: false } }, 'postcss-loader'],
                     exclude: /node_modules/,
                   },
-                ]
-              : <any[]>[
+                ] as any[]),
+              : ([
                   {
                     test: /\.s(a|c)ss$/,
                     use: [
@@ -308,7 +308,7 @@ function parse_configuration(entry: Entry): (_env: any, argv: any) => webpack.Co
                     ],
                     exclude: /node_modules/,
                   },
-                ],
+                ] as any[]),
           ),
         },
       ],

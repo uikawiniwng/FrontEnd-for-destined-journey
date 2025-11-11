@@ -591,7 +591,6 @@ const handleAddCustomItem = (item: Equipment | Item | Skill, type: 'equipment' |
 
 // 下半部分：已选面板
 .summary-area {
-  height: 500px;
   max-height: 500px;
 }
 

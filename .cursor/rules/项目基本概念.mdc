@@ -29,6 +29,21 @@ alwaysApply: true
 
 前端界面或脚本都是在浏览器中使用, 因此你不能使用 nodejs 库
 
+### 优先使用 pinia、zod 管理数据状态
+
+当需要从酒馆读取配置/数据时, 你应该用 pinia 实现响应式读写:
+
+```typescript
+const Settings = z.object({ button_selected: z.boolean().default(false) }).prefault({});
+export const useSettingsStore = defineStore('settings', () => {
+  const settings = ref(Settings.parse(getVariables({ type: 'script', script_id: getScriptId() })));
+  watchEffect(() => {
+    replaceVariables(klona(settings.value), { type: 'script', script_id: getScriptId() });
+  });
+  return { settings };
+});
+```
+
 ### 与酒馆交互的方式
 
 前端界面或脚本主要使用酒馆助手所提供的接口与酒馆进行交互. 这些接口定义在 `@types` 文件夹中, 如 `@types/function/variables.d.ts` 中描述了该如何操控酒馆变量.

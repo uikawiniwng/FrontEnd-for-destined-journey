@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { useStatData } from '../composables/use-stat-data';
-import { getExtensibleItems, safeGet } from '../utils/data-adapter';
+import { compatGet, getExtensibleItems, safeGet } from '../utils/data-adapter';
 import CommonStatus from './common/CommonStatus.vue';
 
 // 定义类型
@@ -18,10 +18,11 @@ interface DivinityInfo {
 // 使用状态数据
 const { statData } = useStatData();
 
-// 获取用户等级
+// 获取用户等级（新路径：角色.等级，旧路径：角色.状态.等级）
 const userLevel = computed(() => {
   if (!statData.value) return 1;
-  return safeGet(statData.value, '角色.状态.等级', 1);
+  const character = safeGet(statData.value, '角色', {});
+  return compatGet(character, '等级', '状态.等级', 1);
 });
 
 // 获取登神长阶数据

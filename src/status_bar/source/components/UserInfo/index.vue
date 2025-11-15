@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { useStatData } from '../../composables/use-stat-data';
 import { useThemeStore } from '../../store/theme';
-import { normalizeStringOrArray, safeGet } from '../../utils/data-adapter';
+import { compatGet, normalizeStringOrArray, safeGet } from '../../utils/data-adapter';
 import CommonStatus from '../common/CommonStatus.vue';
 import PropertyItem from './PropertyItem.vue';
 import ResourceBar from './ResourceBar.vue';
@@ -20,29 +20,28 @@ const resourcesData = computed(() => {
       exp: { current: 0, needed: 0, isMaxLevel: false },
     };
 
-  const resources = safeGet(statData.value, '角色.资源', {});
-  const status = safeGet(statData.value, '角色.状态', {});
-  const level = safeGet(status, '等级', 1);
+  const character = safeGet(statData.value, '角色', {});
 
   // 判断是否达到最高等级（25级）
+  const level = compatGet(character, '等级', '状态.等级', 1);
   const isMaxLevel = level >= 25;
 
   return {
     hp: {
-      current: safeGet(resources, '生命值', 0),
-      max: safeGet(resources, '生命值上限', 0),
+      current: compatGet(character, '生命值', '资源.生命值', 0),
+      max: compatGet(character, '生命值上限', '资源.生命值上限', 0),
     },
     mp: {
-      current: safeGet(resources, '法力值', 0),
-      max: safeGet(resources, '法力值上限', 0),
+      current: compatGet(character, '法力值', '资源.法力值', 0),
+      max: compatGet(character, '法力值上限', '资源.法力值上限', 0),
     },
     sp: {
-      current: safeGet(resources, '体力值', 0),
-      max: safeGet(resources, '体力值上限', 0),
+      current: compatGet(character, '体力值', '资源.体力值', 0),
+      max: compatGet(character, '体力值上限', '资源.体力值上限', 0),
     },
     exp: {
-      current: safeGet(status, '累计经验值', 0),
-      needed: safeGet(status, '升级所需经验', 0),
+      current: compatGet(character, '累计经验值', '状态.累计经验值', 0),
+      needed: compatGet(character, '升级所需经验', '状态.升级所需经验', 0),
       isMaxLevel,
     },
   };
@@ -62,13 +61,12 @@ const statusData = computed(() => {
   }
 
   const character = safeGet(statData.value, '角色', {});
-  const status = safeGet(character, '状态', {});
   const identity = normalizeStringOrArray(safeGet(character, '身份', []));
   const occupation = normalizeStringOrArray(safeGet(character, '职业', []));
 
   return {
-    lifeLevel: safeGet(status, '生命层级', '第一层级/普通层级'),
-    level: safeGet(status, '等级', 1),
+    lifeLevel: compatGet(character, '生命层级', '状态.生命层级', '第一层级/普通层级'),
+    level: compatGet(character, '等级', '状态.等级', 1),
     race: safeGet(character, '种族', '未知'),
     identity: Array.isArray(identity) ? (identity.length > 0 ? identity.join('、') : '暂无') : identity || '暂无',
     occupation: Array.isArray(occupation)
@@ -76,7 +74,7 @@ const statusData = computed(() => {
         ? occupation.join('、')
         : '暂无'
       : occupation || '暂无',
-    adventurerRank: safeGet(status, '冒险者等级', '未评级'),
+    adventurerRank: compatGet(character, '冒险者等级', '状态.冒险者等级', '未评级'),
   };
 });
 

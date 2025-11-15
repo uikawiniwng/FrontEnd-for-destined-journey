@@ -156,150 +156,258 @@ const handleReset = async () => {
 </script>
 
 <template>
-  <div class="theme-panel">
-    <!-- 主题信息 -->
-    <div class="theme-info">
-      <div class="info-content">
-        <h3>
-          🎨 主题设置
-          <span v-if="themeStore.getThemeInfo().isCustomized" class="customized-tag"> 自定义 </span>
-          <span v-else class="theme-name">
-            {{ themeStore.getThemeInfo().name }}
-          </span>
-        </h3>
-      </div>
-      <button class="toggle-btn" :class="{ active: isEditing }" @click="isEditing = !isEditing">
-        {{ isEditing ? '折叠编辑' : '📝 编辑' }}
-      </button>
-    </div>
+  <!-- 浮动按钮 -->
+  <button class="floating-btn" :class="{ active: isEditing }" title="主题设置" @click="isEditing = !isEditing">
+    <i class="fa-solid fa-gear"></i>
+  </button>
 
-    <!-- 编辑面板 -->
-    <div v-if="isEditing" class="editing-panel">
-      <!-- 颜色分组选择 -->
-      <div class="group-selector">
-        <button
-          v-for="(group, groupKey) in colorGroups"
-          :key="groupKey"
-          class="group-btn"
-          :class="{ active: editingGroup === groupKey }"
-          @click="editingGroup = groupKey as typeof editingGroup"
-        >
-          {{ group.label }}
+  <!-- 编辑面板遮罩 -->
+  <div v-if="isEditing" class="modal-overlay" @click="isEditing = false">
+    <div class="theme-panel" @click.stop>
+      <!-- 面板头部 -->
+      <div class="panel-header">
+        <h3>
+          <i class="fa-solid fa-palette"></i>
+          主题设置
+          <span v-if="themeStore.getThemeInfo().isCustomized" class="customized-tag">自定义</span>
+          <span v-else class="theme-name">{{ themeStore.getThemeInfo().name }}</span>
+        </h3>
+        <button class="close-btn" title="关闭" @click="isEditing = false">
+          <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
 
-      <!-- 颜色编辑区域 -->
-      <div class="color-editor">
-        <h4>{{ colorGroups[editingGroup].label }}</h4>
+      <!-- 编辑面板 -->
+      <div class="editing-panel">
+        <!-- 颜色分组选择 -->
+        <div class="group-selector">
+          <button
+            v-for="(group, groupKey) in colorGroups"
+            :key="groupKey"
+            class="group-btn"
+            :class="{ active: editingGroup === groupKey }"
+            @click="editingGroup = groupKey as typeof editingGroup"
+          >
+            {{ group.label }}
+          </button>
+        </div>
 
-        <div class="color-items">
-          <div v-for="item in currentGroupColors" :key="item.key" class="color-item">
-            <label>{{ item.label }}</label>
-            <div class="input-group">
-              <template v-if="isNumericValue(item.key)">
-                <input
-                  type="range"
-                  class="slider"
-                  :value="item.value"
-                  :min="getNumericRange(item.key).min"
-                  :max="getNumericRange(item.key).max"
-                  :step="getNumericRange(item.key).step"
-                  @input="e => handleColorChange(item.key, parseFloat((e.target as HTMLInputElement).value))"
-                />
-                <span class="value-display">{{ item.value }}</span>
-              </template>
-              <template v-else>
-                <input
-                  type="color"
-                  class="color-input"
-                  :value="item.value"
-                  @input="e => handleColorChange(item.key, (e.target as HTMLInputElement).value)"
-                />
-                <input
-                  type="text"
-                  class="text-input"
-                  :value="item.value"
-                  @input="e => handleColorChange(item.key, (e.target as HTMLInputElement).value)"
-                />
-              </template>
+        <!-- 颜色编辑区域 -->
+        <div class="color-editor">
+          <h4>{{ colorGroups[editingGroup].label }}</h4>
+
+          <div class="color-items">
+            <div v-for="item in currentGroupColors" :key="item.key" class="color-item">
+              <label>{{ item.label }}</label>
+              <div class="input-group">
+                <template v-if="isNumericValue(item.key)">
+                  <input
+                    type="range"
+                    class="slider"
+                    :value="item.value"
+                    :min="getNumericRange(item.key).min"
+                    :max="getNumericRange(item.key).max"
+                    :step="getNumericRange(item.key).step"
+                    @input="e => handleColorChange(item.key, parseFloat((e.target as HTMLInputElement).value))"
+                  />
+                  <span class="value-display">{{ item.value }}</span>
+                </template>
+                <template v-else>
+                  <input
+                    type="color"
+                    class="color-input"
+                    :value="item.value"
+                    @input="e => handleColorChange(item.key, (e.target as HTMLInputElement).value)"
+                  />
+                  <input
+                    type="text"
+                    class="text-input"
+                    :value="item.value"
+                    @input="e => handleColorChange(item.key, (e.target as HTMLInputElement).value)"
+                  />
+                </template>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- 操作按钮 -->
-      <div class="actions">
-        <button class="btn-primary" @click="handleSave">💾 保存</button>
-        <button class="btn-secondary" @click="handleReset">🔄 重置为默认</button>
+        <!-- 操作按钮 -->
+        <div class="actions">
+          <button class="btn-primary" @click="handleSave">💾 保存</button>
+          <button class="btn-secondary" @click="handleReset">🔄 重置为默认</button>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
-.theme-panel {
-  background-color: var(--theme-background-secondary);
-  border: 1px solid var(--theme-border-light);
-  border-radius: 6px;
-  padding: 8px 14px;
-  margin-bottom: 15px;
+/* 浮动按钮 - 左上角位置（不贴边） */
+.floating-btn {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  width: 46px;
+  height: 46px;
+  background-color: var(--theme-button-bg);
+  color: var(--theme-button-text);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 19px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+  transition: all 0.3s ease;
+  z-index: 1000;
+
+  &:hover {
+    background-color: var(--theme-button-bg-hover);
+    transform: scale(1.1) rotate(90deg);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.35);
+  }
+
+  &.active {
+    background-color: var(--theme-button-bg-hover);
+    transform: rotate(90deg);
+  }
+
+  i {
+    pointer-events: none;
+  }
+
+  /* 移动端适配 */
+  @media (max-width: 768px) {
+    width: 42px;
+    height: 42px;
+    font-size: 17px;
+    top: 6px;
+    left: 6px;
+  }
 }
 
-/* 主题信息 */
-.theme-info {
+/* 模态遮罩 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 主题面板 */
+.theme-panel {
+  background-color: var(--theme-background);
+  border: 2px solid var(--theme-main-border);
+  border-radius: 8px;
+  padding: 0;
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* 面板头部 */
+.panel-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
+  padding: 12px 16px;
+  background-color: var(--theme-background-secondary);
+  border-bottom: 1px solid var(--theme-border-light);
+  flex-shrink: 0;
 
-  .info-content {
-    h3 {
-      margin: 0;
-      font-size: 0.95em;
-      color: var(--theme-text-secondary);
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 4px;
+  h3 {
+    margin: 0;
+    font-size: 1em;
+    color: var(--theme-text-secondary);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    i {
+      color: var(--theme-button-bg);
     }
 
     .theme-name {
       font-weight: 400;
       color: var(--theme-text-muted);
+      font-size: 0.9em;
+      margin-left: 4px;
     }
 
     .customized-tag {
-      font-weight: 400;
+      font-weight: 500;
       color: var(--theme-button-bg);
+      font-size: 0.85em;
+      background-color: rgba(141, 110, 99, 0.1);
+      padding: 2px 8px;
+      border-radius: 3px;
+      margin-left: 4px;
     }
   }
 
-  .toggle-btn {
-    padding: 6px 12px;
-    background-color: var(--theme-button-bg);
-    color: var(--theme-button-text);
+  .close-btn {
+    width: 32px;
+    height: 32px;
+    background-color: transparent;
+    color: var(--theme-text-secondary);
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 0.85em;
-    transition: background-color 0.2s ease;
-    white-space: nowrap;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
 
     &:hover {
-      background-color: var(--theme-button-bg-hover);
-    }
-
-    &.active {
-      background-color: var(--theme-button-bg-hover);
+      background-color: var(--theme-title-bg-hover);
+      color: var(--theme-text-primary);
     }
   }
 }
 
-/* 编辑面板 */
+/* 编辑面板 - 移除外层滚动 */
 .editing-panel {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid var(--theme-border-light);
+  padding: 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .group-selector {
@@ -332,38 +440,43 @@ const handleReset = async () => {
 }
 
 .color-editor {
-  margin-bottom: 12px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 
   h4 {
     margin: 0 0 10px 0;
     font-size: 0.9em;
     color: var(--theme-text-secondary);
     font-weight: 600;
+    flex-shrink: 0;
   }
 }
 
 .color-items {
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  max-height: 350px;
   overflow-y: auto;
-  padding-right: 6px;
+  padding-right: 8px;
 
   &::-webkit-scrollbar {
-    width: 6px;
+    width: 8px;
   }
 
   &::-webkit-scrollbar-track {
-    background: transparent;
+    background: var(--theme-background-tertiary);
+    border-radius: 4px;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: var(--theme-border-light);
-    border-radius: 3px;
+    background: var(--theme-border-dark);
+    border-radius: 4px;
 
     &:hover {
-      background: var(--theme-border-dark);
+      background: var(--theme-button-bg);
     }
   }
 }

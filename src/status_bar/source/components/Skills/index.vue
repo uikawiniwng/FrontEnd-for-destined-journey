@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { useStatData } from '../../composables/use-stat-data';
-import { getExtensibleItems, safeGet } from '../../utils/data-adapter';
+import { compatGet, getExtensibleItems, safeGet } from '../../utils/data-adapter';
 import { sortByRarity } from '../../utils/quality';
 import CommonStatus from '../common/CommonStatus.vue';
 import SkillItem from '../common/SkillItem.vue';
@@ -9,7 +9,8 @@ const { statData } = useStatData();
 
 // 获取并分类技能
 const skills = computed(() => {
-  const skillData = safeGet(statData.value, '技能列表', {});
+  // 新路径：角色.技能列表，旧路径：技能列表
+  const skillData = compatGet(statData.value, '角色.技能列表', '技能列表', {});
   const items = getExtensibleItems(skillData);
 
   const active: any[] = [];

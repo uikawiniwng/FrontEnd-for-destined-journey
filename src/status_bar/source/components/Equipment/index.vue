@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { useStatData } from '../../composables/use-stat-data';
-import { safeGet } from '../../utils/data-adapter';
+import { compatGet, safeGet } from '../../utils/data-adapter';
 import { sortItemsByRarity } from '../../utils/quality';
 import CommonStatus from '../common/CommonStatus.vue';
 import EquipmentSlot from '../common/EquipmentSlot.vue';
@@ -24,7 +24,8 @@ const equipmentData = computed(() => {
     }));
   }
 
-  const equipment = safeGet(statData.value, '财产.装备', {});
+  // 新路径：装备，旧路径：财产.装备
+  const equipment = compatGet(statData.value, '装备', '财产.装备', {});
 
   return equipmentCategories.map(category => {
     const categoryData = safeGet(equipment, category.key, {});

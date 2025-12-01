@@ -447,6 +447,9 @@ function parse_configuration(entry: Entry): (_env: any, argv: any) => webpack.Co
       if (argv.mode !== 'production' && ['vue', 'pixi'].some(key => request.includes(key))) {
         return callback();
       }
+      if (['react'].some(key => request.includes(key))) {
+        return callback();
+      }
       const global = {
         jquery: '$',
         lodash: '_',

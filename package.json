@@ -42,11 +42,7 @@
     "html-loader": "^5.1.0",
     "html-webpack-inline-svg-plugin": "^2.3.0",
     "html-webpack-plugin": "^5.6.5",
-<<<<<<< HEAD
-    "javascript-obfuscator": "^4.2.1",
-=======
     "javascript-obfuscator": "^5.0.1",
->>>>>>> e6ebb76 (fix: destiny points exchange button render issue & background info render issue)
     "mini-css-extract-plugin": "^2.9.4",
     "postcss": "^8.5.6",
     "postcss-cli": "^11.0.1",

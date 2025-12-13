@@ -208,8 +208,9 @@ public/assets/data/
     {
       "name": "（初始剧情标题）",  // 为初始剧情起个标题好进行区分
       "description": "（初始剧情的一个简要描述）",
-      "requiredRace": "兽族",  // （可选）初始剧情需要什么种族才能进行选择
-      "requiredLocation": "(初始地点)"  //（可选) 初始剧情需要什么起始地点才能进行选择，对应上面的 startLocations 字段
+      "requiredRace": "(种族)",  // （可选）初始剧情需要什么种族才能进行选择
+      "requiredLocation": "(初始地点)",  //（可选) 初始剧情需要什么起始地点才能进行选择，对应上面的 startLocations 字段
+      "requiredIdentity": "(身份)",  // （可选）初始剧情需要什么身份才能进行选择
     }
   ]
 }

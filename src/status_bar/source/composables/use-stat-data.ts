@@ -1,41 +1,32 @@
+import { storeToRefs } from 'pinia';
+import { useStatDataStore } from '../store/stat-data';
+
+/**
+ * 状态数据 composable
+ * 使用 Pinia store 管理，支持手动刷新
+ */
 export function useStatData() {
-  const statData = ref<any>(null);
-  const loading = ref(true);
-  const error = ref<string | null>(null);
+  const store = useStatDataStore();
+  const { data, loading, error, lastRefreshTime } = storeToRefs(store);
 
-  const loadData = () => {
-    try {
-      // 获取变量数据
-      const variables = getVariables({
-        type: 'message',
-        message_id: getCurrentMessageId(),
-      });
-
-      // 提取 stat_data
-      const data = _.get(variables, 'stat_data', {});
-
-      if (!data || Object.keys(data).length === 0) {
-        throw new Error('无法获取状态数据');
-      }
-
-      statData.value = data;
-      error.value = null;
-    } catch (e) {
-      console.error('加载数据失败:', e);
-      error.value = e instanceof Error ? e.message : '未知错误';
-    } finally {
-      loading.value = false;
-    }
-  };
-
+  // 初始加载数据
   onMounted(() => {
-    loadData();
+    // 只在 store 未加载数据时才加载
+    if (data.value === null) {
+      store.refresh();
+    }
   });
 
   return {
-    statData,
+    /** 状态数据 */
+    statData: data,
+    /** 是否正在加载 */
     loading,
+    /** 错误信息 */
     error,
-    loadData,
+    /** 最后刷新时间 */
+    lastRefreshTime,
+    /** 刷新数据 */
+    refresh: store.refresh,
   };
 }

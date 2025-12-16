@@ -86,19 +86,8 @@ const skillSubCategories = computed(() => {
     categories = Object.keys(passiveSkills.value);
   }
 
-  // 将分类分为可用和不可用两组
-  const available: string[] = [];
-  const unavailable: string[] = [];
-
-  categories.forEach(cat => {
-    if (isSkillSubCategoryAvailable(cat)) {
-      available.push(cat);
-    } else {
-      unavailable.push(cat);
-    }
-  });
-
-  // 可用的在前，不可用的在后
+  // 使用 _.partition 将分类分为可用和不可用两组，可用的在前
+  const [available, unavailable] = _.partition(categories, isSkillSubCategoryAvailable);
   return [...available, ...unavailable];
 });
 

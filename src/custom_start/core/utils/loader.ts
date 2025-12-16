@@ -119,19 +119,9 @@ export function mergeData<T>(
   builtinData: Record<string, T[]>,
   customData: Record<string, T[]>,
 ): Record<string, T[]> {
-  const merged = { ...builtinData };
-
-  for (const [category, items] of Object.entries(customData)) {
-    if (merged[category]) {
-      // 如果分类已存在，追加数据
-      merged[category] = [...merged[category], ...items];
-    } else {
-      // 如果分类不存在，创建新分类
-      merged[category] = items;
-    }
-  }
-
-  return merged;
+  return _.mergeWith({}, builtinData, customData, (objValue, srcValue) => {
+    if (_.isArray(objValue)) return [...objValue, ...srcValue];
+  });
 }
 
 /**

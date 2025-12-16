@@ -30,12 +30,13 @@ const totalCount = computed(() => {
   return props.equipments.length + props.items.length + props.skills.length;
 });
 
-const totalCost = computed(() => {
-  const equipmentCost = props.equipments.reduce((sum, item) => sum + item.cost, 0);
-  const itemCost = props.items.reduce((sum, item) => sum + item.cost, 0);
-  const skillCost = props.skills.reduce((sum, item) => sum + item.cost, 0);
-  return equipmentCost + itemCost + skillCost;
-});
+const totalCost = computed(() =>
+  _.sum([
+    _.sumBy(props.equipments, 'cost'),
+    _.sumBy(props.items, 'cost'),
+    _.sumBy(props.skills, 'cost'),
+  ]),
+);
 </script>
 
 <template>

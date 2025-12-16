@@ -1,3 +1,4 @@
+import { klona } from 'klona';
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import type { Rarity } from '../types';
@@ -112,6 +113,7 @@ export const useCustomContentStore = defineStore('customContent', () => {
 
   /**
    * 重置自定义命定之人表单
+   * 使用 klona 确保深拷贝安全
    */
   const resetCustomDestinedOneForm = () => {
     customDestinedOneForm.value = {
@@ -127,7 +129,7 @@ export const useCustomContentStore = defineStore('customContent', () => {
       itemApp: '',
       itemCloth: '',
       itemEquip: [],
-      itemAttributes: { ...defaultAttributes },
+      itemAttributes: klona(defaultAttributes),
       itemStairway: '',
       itemIsContract: true,
       itemAffinity: 0,

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { klona } from 'klona';
 import { computed, ref, watch } from 'vue';
 import {
   FormArrayInput,
@@ -160,20 +161,20 @@ const handleAdd = () => {
     lifeLevel: itemLifeLevel.value.trim() || '未知',
     level: itemGrade.value,
     race: itemRace.value.trim(),
-    identity: itemIdentity.value,
-    career: itemCareer.value,
+    identity: klona(itemIdentity.value),
+    career: klona(itemCareer.value),
     personality: itemPersonality.value.trim() || '未知',
     like: itemLike.value.trim() || '未知',
     app: itemApp.value.trim() || '未知',
     cloth: itemCloth.value.trim() || '未知',
-    equip: itemEquip.value.map(e => ({ ...e, rarity: e.rarity as Rarity })),
-    attributes: itemAttributes.value,
+    equip: klona(itemEquip.value).map(e => ({ ...e, rarity: e.rarity as Rarity })),
+    attributes: klona(itemAttributes.value),
     stairway: parseStairway(itemStairway.value),
     isContract: itemIsContract.value,
     affinity: itemAffinity.value,
     comment: itemComment.value.trim(),
     backgroundInfo: itemBackgroundInfo.value.trim(),
-    skills: itemSkills.value.map(s => ({ ...s, rarity: s.rarity as Rarity })),
+    skills: klona(itemSkills.value).map(s => ({ ...s, rarity: s.rarity as Rarity })),
     isCustom: true,
   };
 

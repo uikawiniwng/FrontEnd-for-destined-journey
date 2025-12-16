@@ -17,9 +17,8 @@ const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
 // 检查物品是否已被选中
-const isSelected = (item: Equipment | Item | Skill) => {
-  return props.selectedItems.some(selected => selected.name === item.name);
-};
+const isSelected = (item: Equipment | Item | Skill) =>
+  _.some(props.selectedItems, { name: item.name });
 
 // 检查物品是否因点数不足而被禁用
 const isDisabled = (item: Equipment | Item | Skill) => {

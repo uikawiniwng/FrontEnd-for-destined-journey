@@ -35,9 +35,7 @@ const isExpanded = (name: string) => {
 };
 
 // 检查是否已选择
-const isSelected = (item: DestinedOne) => {
-  return props.selectedItems.some(selected => selected.name === item.name);
-};
+const isSelected = (item: DestinedOne) => _.some(props.selectedItems, { name: item.name });
 
 // 检查是否可以选择
 const canSelect = (item: DestinedOne) => {

@@ -21,6 +21,10 @@ import type {
   Skill,
 } from '../types';
 
+// 获取默认身份（模糊匹配含有"平民"的第一个值）
+const getDefaultIdentity = () =>
+  _.find(_.keys(getIdentityCosts.value), id => _.includes(id, '平民')) || '自定义';
+
 export const useCharacterStore = defineStore('character', () => {
   // State
   const character = ref<Omit<CharacterConfig, 'attributes'>>({
@@ -30,7 +34,7 @@ export const useCharacterStore = defineStore('character', () => {
     age: 18,
     race: '人类',
     customRace: '',
-    identity: '自由平民',
+    identity: getDefaultIdentity(),
     customIdentity: '',
     startLocation: '大陆东南部区域-索伦蒂斯王国',
     customStartLocation: '',
@@ -120,7 +124,7 @@ export const useCharacterStore = defineStore('character', () => {
       age: 18,
       race: '人类',
       customRace: '',
-      identity: '自由平民',
+      identity: getDefaultIdentity(),
       customIdentity: '',
       startLocation: '大陆东南部区域-索伦蒂斯王国',
       customStartLocation: '',
@@ -281,6 +285,17 @@ export const useCharacterStore = defineStore('character', () => {
       });
     },
     { deep: true },
+  );
+
+  // 监听身份数据加载完成，更新默认身份
+  watch(
+    getIdentityCosts,
+    newCosts => {
+      if (character.value.identity === '自定义' && !_.isEmpty(newCosts)) {
+        character.value.identity = getDefaultIdentity();
+      }
+    },
+    { immediate: true },
   );
 
   return {

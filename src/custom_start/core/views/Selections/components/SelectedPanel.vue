@@ -136,7 +136,6 @@ const totalCost = computed(() =>
   display: flex;
   flex-direction: column;
   height: 100%;
-  max-height: 800px;
 
   .panel-header {
     padding: var(--spacing-md);

@@ -596,7 +596,8 @@ const handleAddCustomItem = (
 
 // 下半部分：已选面板
 .summary-area {
-  max-height: 500px;
+  height: 600px;
+  min-height: 300px;
 }
 
 // 响应式设计

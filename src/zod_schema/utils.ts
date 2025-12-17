@@ -18,7 +18,7 @@ export const clampedNum = (defaultVal: number, min: number, max: number) =>
 // 基础物品描述 schema
 export const BaseItemSchema = z.object({
   品质: z.string(),
-  标签: z.string(),
+  标签: z.string().optional(),
   效果: z.string(),
   描述: z.string(),
 });

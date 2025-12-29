@@ -4,6 +4,7 @@ import {
   IdentitySchema,
   InventoryItemSchema,
   minLimitedNum,
+  StatusEffectSchema,
   TaskSchema,
 } from './utils';
 
@@ -14,7 +15,7 @@ const player = z
   .object({
     ...IdentitySchema.shape,
     累计经验值: z.coerce.number().prefault(0),
-    升级所需经验: z.coerce.number().prefault(23),
+    升级所需经验: z.union([z.coerce.number().prefault(120), z.literal('MAX')]),
     冒险者等级: z.string().prefault('未评级'),
     生命值: z.coerce.number().prefault(0),
     生命值上限: z.coerce.number().prefault(0),
@@ -28,7 +29,7 @@ const player = z
       .prefault({})
       .transform(items => _.pickBy(items, item => item.数量 > 0)),
     金钱: CurrencySchema,
-    任务: z.record(z.string(), TaskSchema).prefault({}),
+    状态效果: z.record(z.string(), StatusEffectSchema).prefault({}),
   })
   .prefault({})
   .transform(data => {
@@ -62,6 +63,8 @@ const player = z
       '法力值',
       '体力值上限',
       '体力值',
+      // 状态效果
+      '状态效果',
       // 物品与货币
       '金钱',
       '背包',
@@ -69,8 +72,6 @@ const player = z
       '装备',
       '技能',
       '登神长阶',
-      // 任务系统
-      '任务',
     ]);
   });
 
@@ -167,6 +168,7 @@ export const Schema = z.object({
       地点: z.string().prefault(''),
     })
     .prefault({}),
+  任务列表: z.record(z.string(), TaskSchema).prefault({}),
   主角: player.prefault({}),
   命定系统: z
     .object({

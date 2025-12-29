@@ -20,6 +20,28 @@
         }
       }
     },
+    "任务列表": {
+      "default": {},
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {
+        "default": {},
+        "type": "object",
+        "properties": {
+          "简介": {
+            "type": "string"
+          },
+          "目标": {
+            "type": "string"
+          },
+          "奖励": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "主角": {
       "default": {},
       "type": "object",
@@ -55,8 +77,16 @@
           "type": "number"
         },
         "升级所需经验": {
-          "default": 23,
-          "type": "number"
+          "anyOf": [
+            {
+              "default": 120,
+              "type": "number"
+            },
+            {
+              "type": "string",
+              "const": "MAX"
+            }
+          ]
         },
         "冒险者等级": {
           "default": "未评级",
@@ -129,7 +159,7 @@
             }
           }
         },
-        "任务": {
+        "状态效果": {
           "default": {},
           "type": "object",
           "propertyNames": {
@@ -139,13 +169,26 @@
             "default": {},
             "type": "object",
             "properties": {
-              "简介": {
+              "类型": {
+                "default": "增益",
+                "type": "string",
+                "enum": [
+                  "增益",
+                  "减益",
+                  "特殊"
+                ]
+              },
+              "效果": {
                 "type": "string"
               },
-              "目标": {
+              "层数": {
+                "default": 1,
+                "type": "number"
+              },
+              "剩余时间": {
                 "type": "string"
               },
-              "奖励": {
+              "来源": {
                 "type": "string"
               }
             }
@@ -379,6 +422,7 @@
       "type": "string"
     },
     "__schema9": {
+      "default": [],
       "type": "array",
       "items": {
         "type": "string"

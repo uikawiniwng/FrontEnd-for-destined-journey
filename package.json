@@ -23,7 +23,11 @@
     "@types/showdown": "^2.0.6",
     "@types/toastr": "^2.1.43",
     "@types/webpack": "^5.28.5",
+<<<<<<< HEAD
     "@typescript-eslint/parser": "^8.50.1",
+=======
+    "@typescript-eslint/parser": "^8.51.0",
+>>>>>>> b5ddf32 (refactor(status): 用 react 重构前端状态栏，进度65%)
     "autoprefixer": "^10.4.23",
     "chokidar": "^5.0.0",
     "css-loader": "^7.1.2",
@@ -66,7 +70,11 @@
     "tsx": "^4.21.0",
     "type-fest": "^5.3.1",
     "typescript": "6.0.0-dev.20250807",
+<<<<<<< HEAD
     "typescript-eslint": "^8.50.1",
+=======
+    "typescript-eslint": "^8.51.0",
+>>>>>>> b5ddf32 (refactor(status): 用 react 重构前端状态栏，进度65%)
     "unplugin-auto-import": "^20.3.0",
     "unplugin-vue-components": "^30.0.0",
     "vue-eslint-parser": "^10.2.0",
@@ -86,6 +94,7 @@
     "dedent": "^1.7.1",
     "glob": "^13.0.0",
     "gsap": "^3.14.2",
+    "immer": "^11.1.3",
     "jquery": "^3.7.1",
     "jqueryui": "^1.11.1",
     "json5": "^2.2.3",
@@ -101,7 +110,8 @@
     "vue-router": "^4.6.4",
     "vue3-pixi": "1.0.0-beta.6",
     "yaml": "^2.8.2",
-    "zod": "^4.2.1"
+    "zod": "^4.2.1",
+    "zustand": "^5.0.9"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
@@ -114,5 +124,5 @@
       "vue-demi"
     ]
   },
-  "version": "0.1.0"
+  "version": "1.2.0"
 }

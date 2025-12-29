@@ -45,8 +45,8 @@ export const TaskSchema = z
  */
 export const CurrencySchema = z
   .object({
-    金币: minLimitedNum(0, 0),
-    银币: minLimitedNum(0, 0),
+    金币: z.coerce.number().prefault(0).transform(Math.round),
+    银币: z.coerce.number().prefault(0).transform(Math.round),
     铜币: z.coerce.number().prefault(0).transform(Math.round),
   })
   .prefault({});
@@ -57,7 +57,7 @@ export const CurrencySchema = z
 export const BaseItemSchema = z.object({
   品质: z.string().prefault(''),
   类型: z.string().prefault(''),
-  标签: z.array(z.string()).optional(),
+  标签: z.array(z.string()).prefault([]).optional(),
   效果: z.record(z.string(), z.string()).prefault({}),
   描述: z.string().prefault(''),
 });
@@ -75,6 +75,19 @@ export const EquipmentSchema = BaseItemSchema.extend({
 export const SkillSchema = BaseItemSchema.extend({
   消耗: z.string().prefault(''),
 }).transform(data => _.pick(data, ['品质', '类型', '消耗', '标签', '效果', '描述']));
+
+/**
+ * 状态效果 schema (增益/减益/特殊效果)
+ */
+export const StatusEffectSchema = z
+  .object({
+    类型: z.enum(['增益', '减益', '特殊']).prefault('增益'),
+    效果: z.string().prefault(''),
+    层数: z.coerce.number().prefault(1),
+    剩余时间: z.string().prefault(''),
+    来源: z.string().prefault(''),
+  })
+  .prefault({});
 
 /**
  * 背包物品 schema

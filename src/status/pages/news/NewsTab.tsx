@@ -1,4 +1,5 @@
 import { FC } from 'react';
+import { useEditorSettingStore } from '../../core/stores';
 import { Collapse, EditableField, EmptyHint, IconTitle } from '../../shared/components';
 import { withMvuData, WithMvuDataProps } from '../../shared/hoc';
 import styles from './NewsTab.module.scss';
@@ -26,9 +27,10 @@ const NewsCategories = [
  * 新闻页内容组件
  */
 const NewsTabContent: FC<WithMvuDataProps> = ({ data }) => {
+  const { editEnabled } = useEditorSettingStore();
   const news = data.新闻;
 
-  /** 渲染新闻条目（可编辑） */
+  /** 渲染新闻条目 */
   const renderNewsItems = (categoryKey: string, categoryData: Record<string, string>) => {
     const entries = _.entries(categoryData);
 
@@ -51,13 +53,16 @@ const NewsTabContent: FC<WithMvuDataProps> = ({ data }) => {
             <div key={title} className={styles.newsItem}>
               <div className={styles.newsItemTitle}>{title}</div>
               <div className={styles.newsItemContent}>
-                <EditableField
-                  path={fieldPath}
-                  value={content}
-                  type="textarea"
-                  label={`${categoryKey} - ${title}`}
-                  className={styles.editableContent}
-                />
+                {editEnabled ? (
+                  <EditableField
+                    path={fieldPath}
+                    value={content}
+                    type="textarea"
+                    className={styles.editableContent}
+                  />
+                ) : (
+                  <span className={styles.newsItemText}>{content}</span>
+                )}
               </div>
             </div>
           );

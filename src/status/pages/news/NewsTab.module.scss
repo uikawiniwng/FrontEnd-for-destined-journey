@@ -61,6 +61,11 @@
   overflow-wrap: anywhere;
 }
 
+// 非编辑模式文本显示
+.newsItemText {
+  white-space: pre-wrap;
+}
+
 // 可编辑内容
 .editableContent {
   width: 100%;

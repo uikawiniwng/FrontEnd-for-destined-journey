@@ -62,13 +62,16 @@ const QuestCard: FC<QuestCardProps> = ({ name, quest, editEnabled, onDelete }) =
             <div key={field.key} className={styles.questField}>
               <span className={styles.fieldLabel}>{field.label}</span>
               <div className={styles.fieldValue}>
-                <EditableField
-                  path={fieldPath}
-                  value={fieldValue ?? ''}
-                  type={field.type}
-                  label={`${name} - ${field.label}`}
-                  className={styles.editableContent}
-                />
+                {editEnabled ? (
+                  <EditableField
+                    path={fieldPath}
+                    value={fieldValue ?? ''}
+                    type={field.type}
+                    className={styles.editableContent}
+                  />
+                ) : (
+                  <span className={styles.fieldText}>{fieldValue ?? ''}</span>
+                )}
               </div>
             </div>
           );

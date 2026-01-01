@@ -123,6 +123,12 @@
   overflow-wrap: anywhere;
 }
 
+// 非编辑模式文本显示
+.fieldText {
+  white-space: pre-wrap;
+  color: var(--theme-text-primary);
+}
+
 // 可编辑内容
 .editableContent {
   width: 100%;

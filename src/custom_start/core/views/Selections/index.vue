@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { computed, inject, onMounted, ref, watch, type Ref } from 'vue';
+import CategorySelectionLayout from '../../components/CategorySelectionLayout.vue';
+import { randomGenerateBus, resetPageBus } from '../../composables';
 import { getRaceCosts } from '../../data/base-info';
 import { getEquipments } from '../../data/equipments';
 import { getInitialItems } from '../../data/Items';
 import { getActiveSkills, getPassiveSkills } from '../../data/skills';
 import { useCharacterStore } from '../../store/character';
 import type { Equipment, Item, Rarity, Skill } from '../../types';
+
 import CategoryTabs, { type CategoryType } from './components/CategoryTabs.vue';
 import CustomItemForm from './components/CustomItemForm.vue';
 import ItemList from './components/ItemList.vue';
@@ -13,10 +15,6 @@ import RarityFilter from './components/RarityFilter.vue';
 import SelectedPanel from './components/SelectedPanel.vue';
 
 const characterStore = useCharacterStore();
-
-// 接收 layout 提供的触发器
-const randomGenerateTrigger = inject<Ref<number>>('randomGenerateTrigger', ref(0));
-const resetPageTrigger = inject<Ref<number>>('resetPageTrigger', ref(0));
 
 // 当前选中的大分类
 const currentCategory = ref<CategoryType>('equipment');
@@ -281,15 +279,9 @@ const handleReset = () => {
   currentRarity.value = 'all';
 };
 
-// 监听随机生成触发器
-watch(randomGenerateTrigger, () => {
-  handleRandomGenerate();
-});
-
-// 监听重置触发器
-watch(resetPageTrigger, () => {
-  handleReset();
-});
+// 使用 EventBus 监听随机生成和重置事件
+randomGenerateBus.on(() => handleRandomGenerate());
+resetPageBus.on(() => handleReset());
 
 // 添加自定义物品
 const handleAddCustomItem = (
@@ -318,55 +310,41 @@ const handleAddCustomItem = (
         <!-- 大分类标签 -->
         <CategoryTabs v-model="currentCategory" />
 
-        <!-- 选择主体区域：左侧导航 + 右侧列表 -->
-        <div class="selection-main">
-          <!-- 左侧：子分类导航 -->
-          <div class="category-sidebar">
-            <div class="category-list">
-              <template v-for="category in subCategories" :key="category">
-                <button
-                  class="category-item"
-                  :class="{ active: currentSubCategory === category }"
-                  @click="currentSubCategory = category"
-                >
-                  {{ getCategoryDisplayName(category) }}
-                </button>
-
-                <!-- 技能的二级分类 -->
-                <div
-                  v-if="
-                    currentCategory === 'skill' &&
-                    currentSubCategory === category &&
-                    skillSubCategories.length > 0
-                  "
-                  class="sub-category-list"
-                >
-                  <button
-                    v-for="subCat in skillSubCategories"
-                    :key="subCat"
-                    class="sub-category-item"
-                    :class="{
-                      active: currentSkillSubCategory === subCat,
-                      disabled: !isSkillSubCategoryAvailable(subCat),
-                    }"
-                    :disabled="!isSkillSubCategoryAvailable(subCat)"
-                    @click="
-                      isSkillSubCategoryAvailable(subCat) && (currentSkillSubCategory = subCat)
-                    "
-                  >
-                    {{ subCat }}
-                  </button>
-                </div>
-              </template>
+        <!-- 选择主体区域 - 使用通用布局组件 -->
+        <CategorySelectionLayout
+          v-model="currentSubCategory"
+          :categories="subCategories"
+          :category-name-formatter="getCategoryDisplayName"
+        >
+          <!-- 技能的二级分类插槽 -->
+          <template #sub-category>
+            <div
+              v-if="currentCategory === 'skill' && skillSubCategories.length > 0"
+              class="sub-category-list"
+            >
+              <button
+                v-for="subCat in skillSubCategories"
+                :key="subCat"
+                class="sub-category-item"
+                :class="{
+                  active: currentSkillSubCategory === subCat,
+                  disabled: !isSkillSubCategoryAvailable(subCat),
+                }"
+                :disabled="!isSkillSubCategoryAvailable(subCat)"
+                @click="isSkillSubCategoryAvailable(subCat) && (currentSkillSubCategory = subCat)"
+              >
+                {{ subCat }}
+              </button>
             </div>
-          </div>
+          </template>
 
-          <!-- 右侧：物品列表 -->
-          <div class="items-content">
-            <!-- 品质筛选 -->
+          <!-- 品质筛选 -->
+          <template #filter>
             <RarityFilter v-model="currentRarity" />
+          </template>
 
-            <!-- 物品列表 -->
+          <!-- 物品列表 -->
+          <template #content>
             <ItemList
               :items="currentItems"
               :selected-items="currentSelectedItems"
@@ -374,8 +352,8 @@ const handleAddCustomItem = (
               @select="handleSelectItem"
               @deselect="handleDeselectItem"
             />
-          </div>
-        </div>
+          </template>
+        </CategorySelectionLayout>
       </div>
 
       <!-- 自定义物品区域 -->
@@ -415,181 +393,55 @@ const handleAddCustomItem = (
   flex-direction: column;
 }
 
-.selection-main {
-  display: grid;
-  grid-template-columns: 200px 1fr;
-  gap: 0;
-  height: 500px;
-  max-height: 500px;
-  border: 2px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-}
-
-// 左侧分类导航
-.category-sidebar {
-  background: var(--card-bg);
-  border-right: 2px solid var(--border-color-strong);
-  padding: var(--spacing-md);
-  height: 100%;
+// 二级分类样式（技能的子分类）
+.sub-category-list {
+  margin-left: var(--spacing-md);
+  margin-top: var(--spacing-xs);
+  margin-bottom: var(--spacing-xs);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  gap: var(--spacing-xs);
+}
 
-  .category-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-    overflow-y: auto;
-    flex: 1;
-    padding-right: var(--spacing-xs);
+.sub-category-item {
+  padding: 4px var(--spacing-sm);
+  background: var(--card-bg);
+  border: 1px solid var(--border-color-light);
+  border-left: 3px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-size: 0.85rem;
+  color: var(--text-light);
+  text-align: left;
+  white-space: normal;
+  word-wrap: break-word;
+  word-break: break-word;
+  line-height: 1.3;
 
-    &::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    &::-webkit-scrollbar-track {
-      background: var(--input-bg);
-      border-radius: var(--radius-sm);
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: var(--border-color);
-      border-radius: var(--radius-sm);
-
-      &:hover {
-        background: var(--border-color-strong);
-      }
-    }
-  }
-
-  .category-item {
-    padding: var(--spacing-sm) var(--spacing-md);
-    background: var(--input-bg);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    transition: all var(--transition-fast);
-    font-size: 0.9rem;
+  &:hover:not(.disabled) {
+    border-left-color: var(--accent-color);
+    background: rgba(212, 175, 55, 0.05);
     color: var(--text-color);
-    text-align: left;
-    white-space: normal;
-    word-wrap: break-word;
-    word-break: break-word;
-    overflow-wrap: break-word;
-    hyphens: auto;
-    line-height: 1.4;
-    min-height: 32px;
-    display: flex;
-    align-items: center;
-
-    &:hover {
-      border-color: var(--accent-color);
-      background: rgba(212, 175, 55, 0.1);
-    }
-
-    &.active {
-      background: var(--accent-color);
-      border-color: var(--accent-color);
-      color: var(--primary-bg);
-      font-weight: 600;
-    }
   }
 
-  // 二级分类
-  .sub-category-list {
-    margin-left: var(--spacing-md);
-    margin-top: var(--spacing-xs);
-    margin-bottom: var(--spacing-xs);
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
+  &.active {
+    background: rgba(212, 175, 55, 0.15);
+    border-left-color: var(--accent-color);
+    color: var(--accent-color);
+    font-weight: 600;
   }
 
-  .sub-category-item {
-    padding: 4px var(--spacing-sm);
-    background: var(--card-bg);
-    border: 1px solid var(--border-color-light);
-    border-left: 3px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    transition: all var(--transition-fast);
-    font-size: 0.85rem;
-    color: var(--text-light);
-    text-align: left;
-    white-space: normal;
-    word-wrap: break-word;
-    word-break: break-word;
-    line-height: 1.3;
-
-    &:hover:not(.disabled) {
-      border-left-color: var(--accent-color);
-      background: rgba(212, 175, 55, 0.05);
-      color: var(--text-color);
-    }
-
-    &.active {
-      background: rgba(212, 175, 55, 0.15);
-      border-left-color: var(--accent-color);
-      color: var(--accent-color);
-      font-weight: 600;
-    }
-
-    &.disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-      background: var(--input-bg);
-      color: var(--text-light);
-      border-left-color: var(--border-color-light);
-
-      &:hover {
-        background: var(--input-bg);
-        border-left-color: var(--border-color-light);
-      }
-    }
-  }
-}
-
-// 右侧物品内容区
-.items-content {
-  background: var(--card-bg);
-  overflow-y: auto;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-
-  // 品质筛选栏固定在顶部
-  :deep(.rarity-filter) {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    background: var(--card-bg);
-    padding: var(--spacing-md) var(--spacing-md) var(--spacing-sm) var(--spacing-md);
-    padding-bottom: var(--spacing-sm);
-    border-bottom: 2px solid var(--border-color);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  }
-
-  // 物品列表区域
-  :deep(.item-list) {
-    flex: 1;
-  }
-
-  &::-webkit-scrollbar {
-    width: 8px;
-  }
-
-  &::-webkit-scrollbar-track {
+  &.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
     background: var(--input-bg);
-    border-radius: var(--radius-md);
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: var(--border-color);
-    border-radius: var(--radius-md);
+    color: var(--text-light);
+    border-left-color: var(--border-color-light);
 
     &:hover {
-      background: var(--border-color-strong);
+      background: var(--input-bg);
+      border-left-color: var(--border-color-light);
     }
   }
 }
@@ -606,43 +458,9 @@ const handleAddCustomItem = (
     gap: var(--spacing-md);
   }
 
-  .selection-main {
-    grid-template-columns: 100px 1fr;
-    height: 450px;
-  }
-
-  .category-sidebar {
-    padding: var(--spacing-xs) 4px;
-
-    .category-item {
-      font-size: 0.75rem;
-      padding: 4px 6px;
-      min-height: 28px;
-      line-height: 1.3;
-    }
-  }
-
   .summary-area {
     height: auto;
     max-height: none;
-  }
-}
-
-// 超小屏幕额外优化
-@media (max-width: 480px) {
-  .selection-main {
-    grid-template-columns: 85px 1fr;
-    height: 400px;
-  }
-
-  .category-sidebar {
-    padding: var(--spacing-xs) 3px;
-
-    .category-item {
-      font-size: 0.7rem;
-      padding: 3px 5px;
-      min-height: 24px;
-    }
   }
 }
 </style>

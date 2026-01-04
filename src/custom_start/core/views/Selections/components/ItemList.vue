@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import ItemCard from '../../../components/ItemCard.vue';
+import { useSelectableList } from '../../../composables';
 import type { Equipment, Item, Skill } from '../../../types';
 
 interface Props {
@@ -16,15 +17,11 @@ interface Emits {
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
-// 检查物品是否已被选中
-const isSelected = (item: Equipment | Item | Skill) =>
-  _.some(props.selectedItems, { name: item.name });
-
-// 检查物品是否因点数不足而被禁用
-const isDisabled = (item: Equipment | Item | Skill) => {
-  if (isSelected(item)) return false;
-  return item.cost > props.availablePoints;
-};
+// 使用通用可选列表逻辑
+const { isSelected, isDisabled } = useSelectableList(
+  () => props.selectedItems,
+  () => props.availablePoints,
+);
 
 const handleSelect = (item: Equipment | Item | Skill) => {
   emit('select', item);

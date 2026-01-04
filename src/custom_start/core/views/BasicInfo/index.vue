@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { computed, inject, type Ref, watch } from 'vue';
 import {
   FormInput,
   FormLabel,
@@ -9,6 +8,7 @@ import {
   FormStepper,
   FormTextarea,
 } from '../../components/Form';
+import { randomGenerateBus, resetPageBus } from '../../composables';
 import {
   ATTRIBUTES,
   BASE_STAT,
@@ -26,10 +26,6 @@ import { useCharacterStore } from '../../store';
 const characterStore = useCharacterStore();
 const { character } = storeToRefs(characterStore);
 const { addAttributePoint, removeAttributePoint } = characterStore;
-
-// 注入父组件提供的触发器
-const randomGenerateTrigger = inject<Ref<number>>('randomGenerateTrigger');
-const resetPageTrigger = inject<Ref<number>>('resetPageTrigger');
 
 // 从外部数据获取选项列表
 const genders = getGenders;
@@ -56,25 +52,9 @@ const levelTierName = computed(() => {
   return tierName;
 });
 
-// 监听随机生成事件
-watch(
-  () => randomGenerateTrigger?.value,
-  () => {
-    if (randomGenerateTrigger && randomGenerateTrigger.value > 0) {
-      randomGenerate();
-    }
-  },
-);
-
-// 监听重置事件
-watch(
-  () => resetPageTrigger?.value,
-  () => {
-    if (resetPageTrigger && resetPageTrigger.value > 0) {
-      resetPage();
-    }
-  },
-);
+// 使用 EventBus 监听随机生成和重置事件
+randomGenerateBus.on(() => randomGenerate());
+resetPageBus.on(() => resetPage());
 
 // 随机生成基本信息
 const randomGenerate = () => {

@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed, inject, onMounted, ref, watch, type Ref } from 'vue';
+import CategorySelectionLayout from '../../components/CategorySelectionLayout.vue';
+import { randomGenerateBus, resetPageBus } from '../../composables';
 import { getBackgrounds } from '../../data/backgrounds';
 import { getAllDestinedOnes } from '../../data/destined-ones';
 import { useCharacterStore } from '../../store/character';
 import { useCustomContentStore } from '../../store/customContent';
 import type { Background, DestinedOne } from '../../types';
-import BackgroundCategoryNav from './components/BackgroundCategoryNav.vue';
+
 import BackgroundList from './components/BackgroundList.vue';
 import CustomDestinedOneForm from './components/CustomDestinedOneForm.vue';
 import DestinedOneList from './components/DestinedOneList.vue';
@@ -14,10 +15,6 @@ import LevelTabs from './components/LevelTabs.vue';
 
 const characterStore = useCharacterStore();
 const customContentStore = useCustomContentStore();
-
-// 接收 layout 提供的触发器
-const randomGenerateTrigger = inject<Ref<number>>('randomGenerateTrigger', ref(0));
-const resetPageTrigger = inject<Ref<number>>('resetPageTrigger', ref(0));
 
 // 命定之人相关状态
 const currentLevel = ref<string>('');
@@ -128,15 +125,9 @@ const handleClearAll = () => {
   customContentStore.updateCustomBackgroundDescription('');
 };
 
-// 监听随机生成触发器
-watch(randomGenerateTrigger, () => {
-  handleRandomGenerate();
-});
-
-// 监听重置触发器
-watch(resetPageTrigger, () => {
-  handleReset();
-});
+// 使用 EventBus 监听随机生成和重置事件
+randomGenerateBus.on(() => handleRandomGenerate());
+resetPageBus.on(() => handleReset());
 
 // 初始化
 onMounted(() => {
@@ -183,21 +174,15 @@ onMounted(() => {
       @exchange="handleExchangeDestinyPoints"
     />
 
-    <!-- 初始剧情区域 -->
+    <!-- 初始剧情区域 - 使用通用布局组件 -->
     <section class="background-section">
       <h2 class="section-title">选择初始开局剧情</h2>
 
-      <div class="background-container">
-        <!-- 左侧：分类导航 -->
-        <div class="background-sidebar">
-          <BackgroundCategoryNav
-            v-model="currentBackgroundCategory"
-            :categories="backgroundCategories"
-          />
-        </div>
-
-        <!-- 右侧：背景列表 -->
-        <div class="background-content">
+      <CategorySelectionLayout
+        v-model="currentBackgroundCategory"
+        :categories="backgroundCategories"
+      >
+        <template #content>
           <BackgroundList
             :items="currentBackgrounds"
             :selected-item="characterStore.selectedBackground"
@@ -207,8 +192,8 @@ onMounted(() => {
             @select="handleSelectBackground"
             @update:custom-description="handleUpdateCustomDescription"
           />
-        </div>
-      </div>
+        </template>
+      </CategorySelectionLayout>
     </section>
 
     <!-- 已选信息面板 -->
@@ -340,30 +325,6 @@ onMounted(() => {
 .background-section {
   display: flex;
   flex-direction: column;
-}
-
-.background-container {
-  display: grid;
-  grid-template-columns: 200px 1fr;
-  gap: 0;
-  height: 500px;
-  max-height: 500px;
-  border: 2px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-}
-
-.background-sidebar {
-  background: var(--card-bg);
-  border-right: 2px solid var(--border-color-strong);
-  height: 100%;
-  overflow: hidden;
-}
-
-.background-content {
-  background: var(--input-bg);
-  height: 100%;
-  overflow: hidden;
 }
 
 // 已选信息面板
@@ -537,11 +498,6 @@ onMounted(() => {
     max-height: 500px;
   }
 
-  .background-container {
-    grid-template-columns: 120px 1fr;
-    height: 450px;
-  }
-
   .summary-section {
     position: static;
   }
@@ -556,11 +512,6 @@ onMounted(() => {
 }
 
 @media (max-width: 480px) {
-  .background-container {
-    grid-template-columns: 100px 1fr;
-    height: 400px;
-  }
-
   .section-title {
     font-size: 1.1rem;
   }

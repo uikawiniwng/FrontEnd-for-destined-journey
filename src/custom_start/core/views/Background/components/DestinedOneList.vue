@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
-import { parseMacroDeep } from '../../../composables/use-macro';
+import { parseMacroDeep, useExpandableCards, useSelectableList } from '../../../composables';
 import type { DestinedOne } from '../../../types';
 
 interface Props {
@@ -17,27 +16,14 @@ interface Emits {
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
-// 折叠状态管理
-const expandedCards = ref<Set<string>>(new Set());
+// 使用通用可选列表逻辑
+const { isSelected, canSelect } = useSelectableList(
+  () => props.selectedItems,
+  () => props.availablePoints,
+);
 
-// 切换折叠状态
-const toggleExpand = (name: string, event: Event) => {
-  event.stopPropagation();
-  if (expandedCards.value.has(name)) {
-    expandedCards.value.delete(name);
-  } else {
-    expandedCards.value.add(name);
-  }
-};
-
-// 检查是否展开
-const isExpanded = (name: string) => expandedCards.value.has(name);
-
-// 检查是否已选择
-const isSelected = (item: DestinedOne) => _.some(props.selectedItems, { name: item.name });
-
-// 检查是否可以选择
-const canSelect = (item: DestinedOne) => props.availablePoints >= item.cost;
+// 使用通用折叠状态管理
+const { toggleExpand, isExpanded } = useExpandableCards();
 
 // 处理选择
 const handleToggle = (item: DestinedOne) => {

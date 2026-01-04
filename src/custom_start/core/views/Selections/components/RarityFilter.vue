@@ -48,8 +48,8 @@ const handleSelect = (value: Rarity | 'all') => {
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
-  padding: var(--spacing-sm) var(--spacing-md);
-  background: var(--input-bg);
+  padding: var(--spacing-sm) var(--spacing-xs);
+  background: var(--card-bg);
   flex-wrap: wrap;
 
   .filter-label {

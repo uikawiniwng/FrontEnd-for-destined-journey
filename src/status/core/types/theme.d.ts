@@ -58,6 +58,8 @@ export interface ThemeColors {
   resourceSp: string;
   /** 经验值颜色 */
   resourceExp: string;
+  /** 资源数值文字颜色 */
+  resourceText: string;
 
   // 品质颜色
   /** 唯一品质 */
@@ -128,7 +130,8 @@ export type ThemePresetId =
   | 'bronze' // 古铜金
   | 'sakura' // 粉紫色
   | 'obsidian' // 墨黑
-  | 'ivory'; // 羊皮纸米黄
+  | 'ivory' // 羊皮纸米黄
+  | 'misty-lilac'; // 雾紫
 
 /**
  * 主题配置

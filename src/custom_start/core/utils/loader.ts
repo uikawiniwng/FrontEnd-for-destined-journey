@@ -8,21 +8,12 @@ const DATA_BASE_PATH =
   'https://testingcf.jsdelivr.net/gh/The-poem-of-destiny/FrontEnd-for-destined-journey@latest/public/assets/data';
 
 /**
- * 生成带缓存破坏参数的 URL
- * 添加时间戳参数来绕过 CDN 缓存
- */
-function getCacheBustedUrl(path: string): string {
-  const timestamp = Date.now();
-  return `${path}?t=${timestamp}`;
-}
-
-/**
  * 通用数据加载函数
  * 使用 JSON5 解析，支持注释和更灵活的格式
  */
 async function loadJsonData<T>(filename: string, dataName: string): Promise<T> {
   try {
-    const response = await fetch(getCacheBustedUrl(`${DATA_BASE_PATH}/${filename}`));
+    const response = await fetch(`${DATA_BASE_PATH}/${filename}`);
     if (!response.ok) {
       console.log(`未找到自定义数据文件 (${filename})`);
       return {} as T;
@@ -98,32 +89,4 @@ export function mergeData<T>(
   return _.mergeWith({}, builtinData, customData, (objValue, srcValue) => {
     if (_.isArray(objValue)) return [...objValue, ...srcValue];
   });
-}
-
-/**
- * 合并技能数据（主动技能和被动技能）
- */
-export function mergeSkillData(
-  builtinActive: Record<string, Skill[]>,
-  builtinPassive: Record<string, Skill[]>,
-  customData: {
-    ActiveSkills?: Record<string, Skill[]>;
-    PassiveSkills?: Record<string, Skill[]>;
-  },
-): {
-  ActiveSkills: Record<string, Skill[]>;
-  PassiveSkills: Record<string, Skill[]>;
-} {
-  const mergedActive = customData.ActiveSkills
-    ? mergeData(builtinActive, customData.ActiveSkills)
-    : builtinActive;
-
-  const mergedPassive = customData.PassiveSkills
-    ? mergeData(builtinPassive, customData.PassiveSkills)
-    : builtinPassive;
-
-  return {
-    ActiveSkills: mergedActive,
-    PassiveSkills: mergedPassive,
-  };
 }

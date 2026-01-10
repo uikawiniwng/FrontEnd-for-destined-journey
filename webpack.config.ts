@@ -450,6 +450,10 @@ function parse_configuration(entry: Entry): (_env: any, argv: any) => webpack.Co
           __VUE_OPTIONS_API__: false,
           __VUE_PROD_DEVTOOLS__: process.env.CI !== 'true',
           __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: false,
+          // 注入版本号用于 CDN 缓存破坏
+          __APP_VERSION__: JSON.stringify(
+            JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf-8')).version,
+          ),
         }),
       )
       .concat(

@@ -38,7 +38,7 @@ interface PresetStorage {
 }
 
 /** 角色卡变量中存储预设的键名 */
-const PRESET_STORAGE_KEY = 'custom_start_presets';
+const PRESET_STORAGE_KEY = 'start_presets';
 
 /**
  * 获取预设存储数据

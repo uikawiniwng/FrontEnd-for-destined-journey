@@ -335,6 +335,7 @@ export function generateAIPrompt(
   if (background) {
     lines.push('');
     lines.push('【初始开局剧情】');
+    lines.push(`${background.name}`);
     // 自定义开局使用用户输入的描述，否则使用预设描述
     const description =
       background.name === '【自定义开局】' && customBackgroundDescription

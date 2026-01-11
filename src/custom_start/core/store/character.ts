@@ -62,9 +62,6 @@ export const useCharacterStore = defineStore('character', () => {
 
   // Computed
 
-  // 已兑换为命运点数的转生点数
-  const exchangedReincarnationPoints = ref(0);
-
   /**
    * 计算当前消耗的转生点数
    */
@@ -86,8 +83,8 @@ export const useCharacterStore = defineStore('character', () => {
       _.sumBy(selectedDestinedOnes.value, 'cost'),
       // 金钱兑换消耗 (1:10)
       Math.ceil(character.value.money / 10),
-      // 兑换命运点数消耗的转生点数
-      exchangedReincarnationPoints.value,
+      // 命运点数兑换消耗 (1:2)
+      Math.ceil(character.value.destinyPoints / 2),
     ]);
   });
 
@@ -204,22 +201,9 @@ export const useCharacterStore = defineStore('character', () => {
     selectedBackground.value = background;
   };
 
-  // 命运点数兑换相关操作
-  const exchangeDestinyPoints = (reincarnationPoints: number) => {
-    // 1 转生点 = 2 命运点
-    const destinyPointsToAdd = reincarnationPoints * 2;
-    character.value.destinyPoints += destinyPointsToAdd;
-    // 记录已兑换的转生点数
-    exchangedReincarnationPoints.value += reincarnationPoints;
-  };
-
-  const resetExchangedPoints = () => {
-    exchangedReincarnationPoints.value = 0;
-  };
-
+  // 命运点数重置
   const resetDestinyExchange = () => {
     character.value.destinyPoints = 0;
-    exchangedReincarnationPoints.value = 0;
   };
 
   // 属性点相关计算
@@ -295,7 +279,6 @@ export const useCharacterStore = defineStore('character', () => {
   return {
     character,
     consumedPoints,
-    exchangedReincarnationPoints,
     selectedEquipments,
     selectedItems,
     selectedSkills,
@@ -325,8 +308,6 @@ export const useCharacterStore = defineStore('character', () => {
     addDestinedOne,
     removeDestinedOne,
     setBackground,
-    exchangeDestinyPoints,
-    resetExchangedPoints,
     resetDestinyExchange,
   };
 });

@@ -13,8 +13,6 @@ export interface CharacterPreset {
   updatedAt: number;
   /** 角色配置 */
   character: Omit<CharacterConfig, 'attributes'>;
-  /** 已兑换的转生点数 */
-  exchangedReincarnationPoints: number;
   /** 选择的装备列表 */
   equipments: Equipment[];
   /** 选择的道具列表 */
@@ -196,7 +194,6 @@ export function createPresetFromStore(
   name: string,
   characterStore: {
     character: Omit<CharacterConfig, 'attributes'>;
-    exchangedReincarnationPoints: number;
     selectedEquipments: Equipment[];
     selectedItems: Item[];
     selectedSkills: Skill[];
@@ -211,7 +208,6 @@ export function createPresetFromStore(
     createdAt: now,
     updatedAt: now,
     character: klona(characterStore.character),
-    exchangedReincarnationPoints: characterStore.exchangedReincarnationPoints,
     equipments: klona(characterStore.selectedEquipments),
     items: klona(characterStore.selectedItems),
     skills: klona(characterStore.selectedSkills),
@@ -220,7 +216,7 @@ export function createPresetFromStore(
   };
 }
 
-/** 角色配置字段列表，用于预设应用（不包含 destinyPoints，需通过兑换机制设置） */
+/** 角色配置字段列表，用于预设应用 */
 const CharacterFields = [
   'name',
   'gender',
@@ -235,6 +231,8 @@ const CharacterFields = [
   'level',
   'attributePoints',
   'reincarnationPoints',
+  'destinyPoints',
+  'money',
 ] as const;
 
 /**
@@ -255,14 +253,11 @@ export function applyPresetToStore(
     addSkill: (skill: Skill) => void;
     addDestinedOne: (destinedOne: DestinedOne) => void;
     setBackground: (background: Background | null) => void;
-    exchangeDestinyPoints: (points: number) => void;
-    resetExchangedPoints: () => void;
   },
 ): void {
   // 1. 重置角色数据和所有选择（包括命定之人和背景）
   characterStore.resetCharacter();
   characterStore.clearAllSelections();
-  characterStore.resetExchangedPoints();
 
   // 2. 应用角色基本信息
   _.forEach(CharacterFields, field => {
@@ -282,11 +277,6 @@ export function applyPresetToStore(
 
   // 4. 应用背景
   characterStore.setBackground(preset.background);
-
-  // 5. 通过兑换机制应用命运点数（消耗转生点数）
-  if (preset.exchangedReincarnationPoints > 0) {
-    characterStore.exchangeDestinyPoints(preset.exchangedReincarnationPoints);
-  }
 
   toastr.success(`已加载预设「${preset.name}」`);
 }

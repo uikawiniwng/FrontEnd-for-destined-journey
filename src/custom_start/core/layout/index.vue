@@ -27,6 +27,8 @@ const {
 } = useStepNavigation();
 const { showModal, modalMode, openManageModal, closeModal, checkAndShowLoadModal } =
   usePresetModal();
+
+const shouldStartJourneyAfterSave = ref(false);
 const { executeJourney } = useJourney();
 const { availablePoints } = usePoints();
 
@@ -48,8 +50,13 @@ const handlePresetLoaded = () => {
   goToFirst();
 };
 
-// 预设保存后继续旅程
+// 预设保存后继续旅程（仅在“踏上旅程”流程触发）
 const handlePresetSavedThenJourney = () => {
+  if (!shouldStartJourneyAfterSave.value) {
+    return;
+  }
+
+  shouldStartJourneyAfterSave.value = false;
   closeModal();
   executeJourney();
 };
@@ -74,6 +81,7 @@ const handleNext = async () => {
 // 保存确认弹窗回调
 const handleSavePreset = () => {
   showSaveConfirm.value = false;
+  shouldStartJourneyAfterSave.value = true;
   openManageModal();
 };
 
@@ -84,6 +92,11 @@ const handleSkipSave = () => {
 
 const handleCancelJourney = () => {
   showSaveConfirm.value = false;
+};
+
+const handleOpenPresetManage = () => {
+  shouldStartJourneyAfterSave.value = false;
+  openManageModal();
 };
 
 // 计算属性
@@ -103,7 +116,7 @@ const nextButtonText = computed(() => {
   <div class="layout">
     <h1 class="main-title">命定之诗与黄昏之歌</h1>
 
-    <HeaderControls @open-preset="openManageModal" />
+    <HeaderControls @open-preset="handleOpenPresetManage" />
 
     <Steps :steps="stepTitles" :step="currentStep" />
 

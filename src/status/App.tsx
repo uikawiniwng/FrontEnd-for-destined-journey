@@ -2,7 +2,7 @@ import { FC, useEffect, useState } from 'react';
 import { DefaultTabId, TabsConfig } from './config/tabs.config';
 import { useEditorSettingStore, useThemeStore } from './core/stores';
 import { ContentArea, TabBar, TitleBar, Window } from './layout';
-import { DestinyTab, ItemsTab, NewsTab, QuestsTab, SettingsTab, StatusTab } from './pages';
+import { DestinyTab, ItemsTab, MapTab, NewsTab, QuestsTab, SettingsTab, StatusTab } from './pages';
 
 const App: FC = () => {
   const [activeTab, setActiveTab] = useState(DefaultTabId);
@@ -37,6 +37,8 @@ const App: FC = () => {
         return <DestinyTab />;
       case 'news':
         return <NewsTab />;
+      case 'map':
+        return <MapTab />;
       default:
         return <div className="placeholder">未知页面</div>;
     }

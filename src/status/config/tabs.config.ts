@@ -30,12 +30,11 @@ export const TabsConfig: TabItem[] = [
     label: '新闻',
     icon: 'fa-solid fa-newspaper',
   },
-  // {
-  //   id: 'map',
-  //   label: '地图',
-  //   icon: 'fa-solid fa-map',
-  //   disabled: true,
-  // },
+  {
+    id: 'map',
+    label: '地图',
+    icon: 'fa-solid fa-map',
+  },
 ];
 
 /** 默认激活的 Tab */

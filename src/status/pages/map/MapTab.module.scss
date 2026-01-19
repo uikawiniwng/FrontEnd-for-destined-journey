@@ -1,0 +1,222 @@
+@use '../../shared/styles/variables' as *;
+@use '../../shared/styles/mixins' as *;
+
+.mapTab {
+  @include page-container;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.mapContent {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-sm;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .toolbarActions {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .sourceActions {
+    flex-wrap: wrap;
+  }
+
+  .mapFrame {
+    height: clamp(320px, 55vh, 700px);
+  }
+}
+
+.toolbarActions {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  flex-wrap: wrap;
+}
+
+.sourceActions {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+}
+
+.sourceButton {
+  @include button-secondary;
+  height: 28px;
+  padding: 0 $spacing-sm;
+  font-size: 12px;
+}
+
+.sourceButtonActive {
+  background: var(--theme-primary-bg);
+  color: var(--theme-primary-text);
+}
+
+.locationText {
+  font-size: 12px;
+  color: var(--theme-text-secondary);
+  @include text-wrap;
+}
+
+.sourceText {
+  font-size: 11px;
+  color: var(--theme-text-muted);
+}
+
+.drawToggle {
+  @include button-secondary;
+  height: 28px;
+  padding: 0 $spacing-sm;
+  font-size: 12px;
+}
+
+.drawToggleActive {
+  background: var(--theme-primary-bg);
+  color: var(--theme-primary-text);
+}
+
+.clearButton {
+  @include button-secondary;
+  height: 28px;
+  padding: 0 $spacing-sm;
+  font-size: 12px;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: $spacing-sm;
+}
+
+.openButton {
+  @include button-primary;
+  height: 28px;
+  padding: 0 $spacing-sm;
+  font-size: 12px;
+}
+
+.mapFrame {
+  height: clamp(360px, 70vh, 900px);
+  border: 1px dashed var(--theme-card-border);
+  border-radius: $border-radius-sm;
+  @include bg-overlay-light;
+  position: relative;
+  overflow: hidden;
+}
+
+.mapViewer {
+  width: 100%;
+  height: 100%;
+}
+
+.mapMarker {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  transform: translate(-50%, -50%);
+}
+
+.mapMarkerDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--theme-primary-bg);
+  border: 1px solid var(--theme-card-border);
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.35);
+}
+
+.mapMarkerCard {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  min-width: 140px;
+  max-width: 240px;
+  padding: $spacing-xs $spacing-sm;
+  border-radius: $border-radius-sm;
+  border: 1px solid var(--theme-card-border);
+  background: var(--theme-window-bg);
+  color: var(--theme-text-primary);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 2;
+}
+
+.mapMarker:hover .mapMarkerCard {
+  opacity: 1;
+}
+
+.mapMarkerTitle {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.mapMarkerSummary {
+  font-size: 11px;
+  color: var(--theme-text-secondary);
+  margin-bottom: 6px;
+}
+
+.mapMarkerImage {
+  width: 100%;
+  border-radius: $border-radius-sm;
+  display: block;
+}
+
+.drawLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.drawLayerActive {
+  pointer-events: auto;
+  cursor: crosshair;
+}
+
+.drawCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.drawLayerDisabled {
+  pointer-events: none;
+}
+
+.drawCanvasDisabled {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.mapPlaceholder {
+  @include flex-center;
+  height: 100%;
+  color: var(--theme-text-muted);
+  font-size: 12px;
+  text-align: center;
+  padding: $spacing-md;
+}

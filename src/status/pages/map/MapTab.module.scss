@@ -384,7 +384,7 @@
 }
 
 .mapFrame {
-  height: clamp(260px, 45vh, 640px);
+  height: clamp(320px, 58vh, 760px);
   border: 1px dashed var(--theme-card-border);
   border-radius: $border-radius-sm;
   @include bg-overlay-light;
@@ -754,6 +754,6 @@
   }
 
   .mapFrame {
-    height: clamp(240px, 40vh, 520px);
+    height: clamp(280px, 50vh, 620px);
   }
 }

@@ -358,8 +358,28 @@ const formatEffectEntries = (effect?: Record<string, string>) =>
         font-size: 0.85rem;
       }
 
-      .effect-content {
+      .effect-grid {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-sm);
+      }
+
+      .effect-row {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        padding-left: var(--spacing-xs);
+        border-left: 2px solid var(--accent-color);
+      }
+
+      .effect-key {
+        font-size: 0.85rem;
+        color: var(--accent-color);
+      }
+
+      .effect-value {
         font-size: 0.8rem;
+        line-height: 1.5;
       }
     }
 

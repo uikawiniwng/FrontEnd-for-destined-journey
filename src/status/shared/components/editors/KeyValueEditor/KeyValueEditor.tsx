@@ -64,6 +64,7 @@ export const KeyValueEditor: FC<KeyValueEditorProps> = ({
     setEditingValue(String(value[key]));
   };
 
+  /** 确认编辑（失焦或按键触发） */
   const handleConfirmEdit = () => {
     if (editingKey === null) return;
     const parsedValue = valueType === 'number' ? parseFloat(editingValue) || 0 : editingValue;
@@ -72,9 +73,17 @@ export const KeyValueEditor: FC<KeyValueEditorProps> = ({
     setEditingValue('');
   };
 
+  /** 取消编辑（Escape 触发） */
   const handleCancelEdit = () => {
     setEditingKey(null);
     setEditingValue('');
+  };
+
+  /** 失焦时自动保存（与其他编辑器行为一致） */
+  const handleBlur = () => {
+    if (!disabled) {
+      handleConfirmEdit();
+    }
   };
 
   const handleKeyDown = (
@@ -117,6 +126,7 @@ export const KeyValueEditor: FC<KeyValueEditorProps> = ({
                         value={editingValue}
                         onChange={e => setEditingValue(e.target.value)}
                         onKeyDown={e => handleKeyDown(e, 'edit')}
+                        onBlur={handleBlur}
                         className={styles.editInput}
                         autoFocus
                       />
@@ -125,28 +135,13 @@ export const KeyValueEditor: FC<KeyValueEditorProps> = ({
                         value={editingValue}
                         onChange={e => setEditingValue(e.target.value)}
                         onKeyDown={e => handleKeyDown(e, 'edit')}
+                        onBlur={handleBlur}
                         className={styles.editTextarea}
                         rows={3}
                         autoFocus
-                        placeholder="Ctrl+Enter 提交"
+                        placeholder="失焦自动保存 · Esc 取消"
                       />
                     )}
-                    <div className={styles.editActions}>
-                      <button
-                        className={`${styles.actionBtn} ${styles.confirmBtn}`}
-                        onClick={handleConfirmEdit}
-                        title="确认 (Ctrl+Enter)"
-                      >
-                        <i className="fa-solid fa-check" />
-                      </button>
-                      <button
-                        className={`${styles.actionBtn} ${styles.cancelBtn}`}
-                        onClick={handleCancelEdit}
-                        title="取消 (Esc)"
-                      >
-                        <i className="fa-solid fa-xmark" />
-                      </button>
-                    </div>
                   </div>
                 ) : (
                   <>

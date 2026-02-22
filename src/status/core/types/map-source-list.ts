@@ -10,11 +10,11 @@ export const mapSourceList: MapSourceConfig[] = [
   {
     key: 'small',
     name: '高清地图',
-    url: 'https://i.ibb.co/S4WC1Cfg/image.webp',
+    url: 'https://i.ibb.co/PL92LkT/Maplite.webp',
   },
   {
     key: 'large',
     name: '超清地图',
-    url: 'https://files.catbox.moe/k8hhwt.webp',
+    url: 'https://i.ibb.co/fzNWXMnq/Map.webp',
   },
 ];

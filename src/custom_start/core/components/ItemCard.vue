@@ -144,6 +144,9 @@ const formatEffectEntries = (effect?: Record<string, string>) =>
   transition: all var(--transition-normal);
   position: relative;
   overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: pan-y;
 
   &::before {
     content: '';
@@ -336,11 +339,18 @@ const formatEffectEntries = (effect?: Record<string, string>) =>
 @media (max-width: 768px) {
   .item-card {
     padding: var(--spacing-sm);
+    border-radius: var(--radius-md);
   }
 
   .card-header {
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
+    padding-bottom: var(--spacing-xs);
+
     .item-name {
       font-size: 1rem;
+      line-height: 1.35;
     }
 
     .item-rarity {
@@ -349,11 +359,17 @@ const formatEffectEntries = (effect?: Record<string, string>) =>
   }
 
   .card-body {
+    margin-bottom: var(--spacing-sm);
+
     .item-info {
       font-size: 0.85rem;
+      margin-bottom: 4px;
     }
 
     .item-effect {
+      margin: var(--spacing-xs) 0;
+      padding: var(--spacing-xs);
+
       .effect-label {
         font-size: 0.85rem;
       }
@@ -385,10 +401,16 @@ const formatEffectEntries = (effect?: Record<string, string>) =>
 
     .item-description {
       font-size: 0.8rem;
+      display: -webkit-box;
+      overflow: hidden;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3;
     }
   }
 
   .card-footer {
+    padding-top: var(--spacing-xs);
+
     .item-cost {
       .cost-label {
         font-size: 0.85rem;

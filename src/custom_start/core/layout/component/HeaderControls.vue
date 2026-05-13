@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * 头部控制区组件
- * 包含转生点显示、Roll 点数按钮和预设管理按钮
+ * 包含转生点显示、Roll 点数按钮和自定义内容管理按钮
  */
 import { storeToRefs } from 'pinia';
 
@@ -12,8 +12,17 @@ const characterStore = useCharacterStore();
 const { character } = storeToRefs(characterStore);
 const { availablePoints, canRollPoints, rollPoints } = usePoints();
 
+interface Props {
+  isFullscreen?: boolean;
+}
+
+withDefaults(defineProps<Props>(), {
+  isFullscreen: false,
+});
+
 const emit = defineEmits<{
   openPreset: [];
+  toggleFullscreen: [];
 }>();
 </script>
 
@@ -36,9 +45,17 @@ const emit = defineEmits<{
         <i class="fa-solid fa-dice"></i>
         <span class="button-text">Roll 点数</span>
       </button>
-      <button class="control-button preset-button" title="管理角色预设" @click="emit('openPreset')">
-        <i class="fa-solid fa-bookmark"></i>
-        <span class="button-text">预设管理</span>
+      <button class="control-button preset-button" title="管理预设、武器、技能和道具" @click="emit('openPreset')">
+        <i class="fa-solid fa-folder-tree"></i>
+        <span class="button-text">内容管理</span>
+      </button>
+      <button
+        class="control-button fullscreen-button"
+        :title="isFullscreen ? '退出全屏' : '进入全屏'"
+        @click="emit('toggleFullscreen')"
+      >
+        <i :class="isFullscreen ? 'fa-solid fa-compress' : 'fa-solid fa-expand'"></i>
+        <span class="button-text">{{ isFullscreen ? '退出全屏' : '全屏' }}</span>
       </button>
     </div>
   </div>
@@ -142,6 +159,15 @@ const emit = defineEmits<{
   }
 }
 
+.fullscreen-button {
+  background: linear-gradient(135deg, #7b6a58 0%, #5c4033 100%);
+  color: white;
+
+  &:hover {
+    background: linear-gradient(135deg, #8b7a68 0%, #6d5042 100%);
+  }
+}
+
 @keyframes shake {
   0%,
   100% {
@@ -157,16 +183,63 @@ const emit = defineEmits<{
 
 @media (max-width: 768px) {
   .header-controls {
-    flex-direction: column;
-    gap: var(--spacing-md);
+    flex: none;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    margin-bottom: 0;
+    flex-wrap: nowrap;
+    min-width: 0;
   }
 
   .points-display {
-    font-size: 1rem;
+    flex: 1 1 auto;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    min-width: 0;
+    gap: 4px;
+    font-size: 0.78rem;
+
+    .points-label {
+      white-space: nowrap;
+    }
 
     .points-value {
-      font-size: 1.3rem;
+      font-size: 1rem;
     }
+
+    .points-total {
+      font-size: 0.78rem;
+    }
+  }
+
+  .control-buttons {
+    flex: 0 0 auto;
+    display: flex;
+    gap: 6px;
+    width: auto;
+    min-width: 0;
+  }
+
+  .control-button {
+    min-height: 30px;
+    padding: 5px 7px;
+    border-radius: var(--radius-md);
+    font-size: 0.72rem;
+    justify-content: center;
+    min-width: 0;
+  }
+
+  .fullscreen-button .button-text {
+    display: none;
+  }
+
+  .button-text {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 </style>

@@ -168,6 +168,9 @@ declare function stopGenerationById(generation_id: string): boolean;
 declare function stopAllGeneration(): boolean;
 
 type GenerateConfig = {
+  /** 要使用的预设名称, 默认为当前加载的预设 `'in_use'`; 若设置, 则会用所选预设的提示词及参数, 但不会使用所选预设的正则、酒馆助手脚本 */
+  preset_name?: 'in_use' | string;
+
   /**
    * 请求生成的唯一标识符, 不设置则默认生成一个随机标识符.
    *
@@ -228,19 +231,19 @@ type GenerateConfig = {
 type GenerateRawConfig = GenerateConfig & {
   /**
    * 一个提示词数组, 数组元素将会按顺序发给 AI, 因而相当于自定义预设. 该数组允许存放两种类型:
-   * - `BuiltinPrompt`: 内置提示词. 由于不使用预设, 如果需要 "角色描述" 等提示词, 你需要自己指定要用哪些并给出顺序
-   *                      如果不想自己指定, 可通过 `builtin_prompt_default_order` 得到酒馆默认预设所使用的顺序 (但对于这种情况, 也许你更应该用 `generate`).
+   * - `PlaceholderPrompt`: 内置提示词. 由于不使用预设, 如果需要 "角色描述" 等提示词, 你需要自己指定要用哪些并给出顺序
+   *                        如果不想自己指定, 可通过 `placeholder_prompt_default_order` 得到酒馆默认预设所使用的顺序 (但对于这种情况, 也许你更应该用 `generate`).
    * - `RolePrompt`: 要额外给定的提示词.
    */
-  ordered_prompts?: (BuiltinPrompt | RolePrompt)[];
+  ordered_prompts?: (PlaceholderPrompt | RolePrompt)[];
 };
 
 /**
  * 预设为内置提示词设置的默认顺序
  */
-declare const builtin_prompt_default_order: BuiltinPrompt[];
+declare const placeholder_prompt_default_order: PlaceholderPrompt[];
 
-type BuiltinPrompt =
+type PlaceholderPrompt =
   | 'world_info_before'
   | 'persona_description'
   | 'char_description'
@@ -315,3 +318,131 @@ type CustomApiConfig = {
   top_p?: 'same_as_preset' | 'unset' | number;
   top_k?: 'same_as_preset' | 'unset' | number;
 };
+
+/**
+ * JSON Schema 定义，用于强制模型输出符合指定 schema 的 JSON。
+ *
+ * @example
+ * const result = await generateRaw({
+ *   user_input: '描述场景',
+ *   json_schema: {
+ *     name: 'scene_output',
+ *     description: '场景描述和角色状态',
+ *     value: {
+ *       type: 'object',
+ *       properties: {
+ *         narrative: { type: 'string', description: '叙事文本' },
+ *         status: { type: 'object', properties: { name: { type: 'string' } } }
+ *       },
+ *       required: ['narrative', 'status']
+ *     }
+ *   }
+ * });
+ * const parsed = JSON.parse(result as string);
+ */
+type JsonSchema = {
+  /** Schema 名称 */
+  name: string;
+  /** Schema 描述 */
+  description?: string;
+  /** JSON Schema 定义 */
+  value: Record<string, any>;
+  /** 是否严格模式（默认 true） */
+  strict?: boolean;
+};
+
+/**
+ * Tool function 定义
+ */
+type ToolFunction = {
+  /** 工具函数名称 */
+  name: string;
+  /** 工具函数描述 */
+  description?: string;
+  /** JSON Schema 格式的参数定义 */
+  parameters?: Record<string, any>;
+};
+
+/**
+ * Tool 定义（OpenAI 格式）
+ */
+type ToolDefinition = {
+  type: 'function';
+  function: ToolFunction;
+};
+
+/**
+ * Tool choice 选项
+ */
+type ToolChoice = 'auto' | 'required' | 'none' | 'any' | { type: 'function'; function: { name: string } };
+
+/**
+ * 当模型返回 tool_calls 时的结构化结果。
+ *
+ * 仅在 `generate` / `generateRaw` 配置中传入了 `tools` 且模型决定调用工具时返回；
+ * 否则函数仍返回普通的 `string`。
+ */
+type GenerateToolCallResult = {
+  /** 模型返回的文本内容（可能为空字符串） */
+  content: string;
+  /** 模型请求调用的工具列表 */
+  tool_calls: {
+    id: string;
+    type: 'function';
+    function: {
+      /** 工具函数名称 */
+      name: string;
+      /** JSON 字符串格式的参数 */
+      arguments: string;
+    };
+    /**
+     * 加密的 reasoning/thought 签名（若 provider 返回）。
+     *
+     * 多轮 tool call 场景下必须把签名原样回传给下一轮请求以维持推理上下文。
+     *
+     * **Gemini 3 强制要求**：不回传 thought_signature 会返回 4xx 校验错误
+     * （Gemini 2.5 及之前是可选，3.0+ 强制，见官方 thought-signatures 文档）。
+     *
+     * **并行 tool call**：Gemini 只会把签名挂在**第一个** tool_call 上，
+     * 后续并行 call 的 `thought_signature` 为 undefined——这一个签名代表整批，
+     * 回传时只需要还原到第一个 call 对应的 functionCall part 上。
+     *
+     * **多轮累积**：必须把**历史所有轮次**返回过的签名一起回传，而不是只带最后一次。
+     *
+     * **绕过校验**（仅限手动构造 tool call 的情况）：把 thought_signature 设为
+     * `"skip_thought_signature_validator"` 或 `"context_engineering_is_the_way_to_go"`
+     * 可以跳过 Gemini 服务端校验。
+     */
+    thought_signature?: string;
+  }[];
+  /**
+   * 顶层 reasoning 签名（非绑定到具体 tool_call 的那一份）。
+   *
+   * 主要出现在「模型只返回文本、没有 tool_calls」的场景：Gemini 会把签名挂在最后一个
+   * text part 上（流式终帧里可能是空字符串 text + 签名）。OpenRouter 通过
+   * `reasoning_details` 暴露非 tool 绑定的 encrypted 段；Claude 通过 thinking 块的
+   * signature 字段提供。
+   *
+   * 同样用于多轮场景下把 thinking 上下文回传给下一轮请求。
+   */
+  reasoning_signature?: string;
+};
+
+//----------------------------------------------------------------------------------------------------------------------
+/**
+ * 预设为内置提示词设置的默认顺序
+ * @deprecated 请使用 `placeholder_prompt_default_order`
+ */
+declare const builtin_prompt_default_order: PlaceholderPrompt[];
+
+/** @deprecated 请使用 `PlaceholderPrompt` */
+type BuiltinPrompt =
+  | 'world_info_before'
+  | 'persona_description'
+  | 'char_description'
+  | 'char_personality'
+  | 'scenario'
+  | 'world_info_after'
+  | 'dialogue_examples'
+  | 'chat_history'
+  | 'user_input';
